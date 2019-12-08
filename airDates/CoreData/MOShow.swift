@@ -15,4 +15,12 @@ class MOShow: NSManagedObject {
     @NSManaged public var title: String
     @NSManaged public var imgUrl: String
     
+    @NSManaged public var desc: String?
+    @NSManaged public var minutesTilNextEpisode: NSNumber?
+    @NSManaged public var nextEpisodeString: String?
+    @NSManaged public var status: String?
+//    @NSManaged public var img: Data?
+//    @NSManaged public var countdownDate: Date?
+//    @NSManaged public var countdownString: String?
+    
 }

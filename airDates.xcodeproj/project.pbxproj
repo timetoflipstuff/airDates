@@ -21,6 +21,8 @@
 		E6AE59B6239AA34D007C01E3 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE59B5239AA34D007C01E3 /* NetworkManager.swift */; };
 		E6AE59B8239AA42B007C01E3 /* NetworkModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE59B7239AA42B007C01E3 /* NetworkModels.swift */; };
 		E6AE59BA239AAC32007C01E3 /* AddShowVCCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE59B9239AAC32007C01E3 /* AddShowVCCell.swift */; };
+		E6AE59BC239B2B13007C01E3 /* AddShowExpandedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE59BB239B2B13007C01E3 /* AddShowExpandedVC.swift */; };
+		E6AE59BE239BD718007C01E3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE59BD239BD718007C01E3 /* Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +42,8 @@
 		E6AE59B5239AA34D007C01E3 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		E6AE59B7239AA42B007C01E3 /* NetworkModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkModels.swift; sourceTree = "<group>"; };
 		E6AE59B9239AAC32007C01E3 /* AddShowVCCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShowVCCell.swift; sourceTree = "<group>"; };
+		E6AE59BB239B2B13007C01E3 /* AddShowExpandedVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShowExpandedVC.swift; sourceTree = "<group>"; };
+		E6AE59BD239BD718007C01E3 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				E6AE5990239A87A0007C01E3 /* AppDelegate.swift */,
+				E6AE59BD239BD718007C01E3 /* Extensions.swift */,
 			);
 			path = "Supporting Files";
 			sourceTree = "<group>";
@@ -116,6 +121,7 @@
 			children = (
 				E6AE5992239A87A0007C01E3 /* MyShowsTableVC.swift */,
 				E6AE59B1239A912E007C01E3 /* AddShowVC.swift */,
+				E6AE59BB239B2B13007C01E3 /* AddShowExpandedVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -216,7 +222,9 @@
 				E6AE59AA239A8D0F007C01E3 /* DataModel.xcdatamodeld in Sources */,
 				E6AE5993239A87A0007C01E3 /* MyShowsTableVC.swift in Sources */,
 				E6AE5991239A87A0007C01E3 /* AppDelegate.swift in Sources */,
+				E6AE59BC239B2B13007C01E3 /* AddShowExpandedVC.swift in Sources */,
 				E6AE59AE239A8DDD007C01E3 /* CoreDataManager.swift in Sources */,
+				E6AE59BE239BD718007C01E3 /* Extensions.swift in Sources */,
 				E6AE59B0239A8E28007C01E3 /* MOShow.swift in Sources */,
 				E6AE59B4239A9882007C01E3 /* MyShowsTableVCCell.swift in Sources */,
 				E6AE59BA239AAC32007C01E3 /* AddShowVCCell.swift in Sources */,

@@ -33,10 +33,9 @@ class AddShowVCCell: UITableViewCell{
         imgView.contentMode = .scaleAspectFill
         imgView.clipsToBounds = true
         imgView.layer.cornerRadius = 4
-        addButton.backgroundColor = .black
         addButton.layer.cornerRadius = 4
-        addButton.setTitle("Track", for: UIControl.State.normal)
         addButton.addTarget(self, action: #selector(addShow), for: .touchUpInside)
+        updateTrackButton()
         
         contentView.backgroundColor = .white
         contentView.addSubview(imgView)
@@ -73,16 +72,52 @@ class AddShowVCCell: UITableViewCell{
 
         guard let id = showId, let title = titleLabel.text, let imgUrl = imgUrl else {return}
         isTracked = !isTracked
+        
+        updateTrackButton()
+        
         if isTracked {
-            CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl)
-            self.addButton.backgroundColor = .gray
-            self.addButton.setTitle("Untrack", for: UIControl.State.normal)
+            
+            CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl) {success in
+                
+                if success {
+                    
+                    self.isTracked = true
+                    self.updateTrackButton()
+                    
+                }
+                
+            }
+            
         } else {
-            CoreDataManager.shared.deleteShow(id: Int32(id))
-            self.addButton.backgroundColor = .black
-            self.addButton.setTitle("Track", for: UIControl.State.normal)
+            
+            CoreDataManager.shared.deleteShow(id: Int32(id)) {success in
+                
+                if success {
+                    
+                    self.isTracked = false
+                    self.updateTrackButton()
+                    
+                }
+                
+            }
+            
         }
         
+    }
+    
+    public func updateTrackButton() {
+        
+        if isTracked {
+            
+            self.addButton.backgroundColor = .gray
+            self.addButton.setTitle("Untrack", for: UIControl.State.normal)
+            
+        } else {
+            
+            self.addButton.backgroundColor = .black
+            self.addButton.setTitle("Track", for: UIControl.State.normal)
+            
+        }
         
     }
     
@@ -93,9 +128,12 @@ class AddShowVCCell: UITableViewCell{
     override func prepareForReuse() {
         super.prepareForReuse()
         
+        self.isTracked = false
         self.imgView.image = nil
         self.titleLabel.text = ""
         self.airLabel.text = ""
+        
+        updateTrackButton()
     }
     
 }

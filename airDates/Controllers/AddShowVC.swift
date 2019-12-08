@@ -14,6 +14,8 @@ class AddShowVC: UIViewController {
     var shows: [Show] = []
     let tableView = UITableView()
     
+    var myShows: [MOShow]?
+    
     private let searchController = UISearchController(searchResultsController: nil)
     
     private func setupSearchBar() {
@@ -27,6 +29,7 @@ class AddShowVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         view.backgroundColor = .white
         setupSearchBar()
         tableView.frame = view.safeAreaLayoutGuide.layoutFrame
@@ -35,6 +38,8 @@ class AddShowVC: UIViewController {
         tableView.tableFooterView = UIView()
         
         view.addSubview(tableView)
+        
+        myShows = CoreDataManager.shared.getFetchedResultsController().fetchedObjects
         
         tableView.register(AddShowVCCell.self, forCellReuseIdentifier: AddShowVCCell.reuseId)
         
@@ -61,6 +66,14 @@ extension AddShowVC: UITableViewDataSource {
         let show = shows[indexPath.row]
         
         let cell = tableView.dequeueReusableCell(withIdentifier: AddShowVCCell.reuseId, for: indexPath) as! AddShowVCCell
+        if let myShows = myShows {
+            for myShow in myShows {
+                if myShow.id == Int32(show.id) {
+                    cell.isTracked = true
+                    cell.updateTrackButton()
+                }
+            }
+        }
         
         cell.showId = show.id
         cell.title = show.name

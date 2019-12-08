@@ -17,10 +17,6 @@ class MyShowsTableVC: UITableViewController {
 
     override func viewDidLoad() {
         
-        let fetchedShows = coreData.getFetchedResultsController()
-        
-        myShows = fetchedShows.fetchedObjects
-        
         super.viewDidLoad()
         
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -28,6 +24,108 @@ class MyShowsTableVC: UITableViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(handleShowAddition))
         
         tableView.register(MyShowsTableVCCell.self, forCellReuseIdentifier: MyShowsTableVCCell.reuseId)
+        
+        setupTableView()
+        
+    }
+    
+    func setupTableView() {
+        
+        myShows = []
+        
+        guard let fetchedShows = coreData.getFetchedResultsController().fetchedObjects else {return}
+        
+        let dispatchGroup = DispatchGroup()
+        
+        for fetchedShow in fetchedShows {
+            
+            dispatchGroup.enter()
+            
+            NetworkManager.shared.getShowData(id: fetchedShow.id) {showData in
+                
+                guard let showData = showData else {
+                    
+                    dispatchGroup.leave()
+                    return
+                    
+                }
+                
+                var minutesTilNextEpisode: NSNumber? = 1000000
+                var nextEpisodeString: String? = nil
+                let status = showData.tvShow.status
+                let desc = showData.tvShow.description
+                
+                if let countdown = showData.tvShow.countdown {
+                    
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy'-'MM'-'dd' 'HH':'mm':'ss"
+                    dateFormatter.locale = Locale(identifier: "en_US")
+                    
+                    do {
+                        print("going for the difference")
+                        if let difference = try self.getTimeTilNextEpisode(apiDateString: countdown.air_date) {
+                            print("going for the days, hours etc")
+                            if let years = difference.year, let days = difference.day, let hours = difference.hour, let minutes = difference.minute {
+                                print("got in, what the fuck then")
+                                let countdownInMinutes = years*525600 + days*1440 + hours*60 + minutes
+                                minutesTilNextEpisode = countdownInMinutes as NSNumber
+                                let countdown: String
+                                if years > 1 {
+                                    countdown = "\(years) years"
+                                } else if years == 1 {
+                                    countdown = "1 year"
+                                } else if days > 1 {
+                                    countdown = "\(days) days"
+                                } else if days == 1 {
+                                    countdown = "1 day"
+                                } else if hours > 1 {
+                                    countdown = "\(hours) hours"
+                                } else if hours == 1 {
+                                    countdown = "1 hour"
+                                } else {
+                                    countdown = "\(minutes) minutes"
+                                }
+                                nextEpisodeString = "New episode in \(countdown)"
+                                print("\(showData.tvShow.name) \(nextEpisodeString ?? "none") \(Int(minutesTilNextEpisode ?? 0))")
+                            }
+                        }
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                    
+                }
+                
+                CoreDataManager.shared.updateShow(id: fetchedShow.id, desc: desc, minutesTilNextEpisode: minutesTilNextEpisode, nextEpisodeString: nextEpisodeString, status: status) {_ in
+                    dispatchGroup.leave()
+                }
+                
+            }
+            
+        }
+        
+        dispatchGroup.notify(queue: DispatchQueue.main) {
+            let updatedShows = self.coreData.getFetchedResultsController()
+            
+            self.myShows = updatedShows.fetchedObjects
+            
+            self.tableView.reloadData()
+        }
+        
+    }
+    
+    func getTimeTilNextEpisode(apiDateString: String) throws -> DateComponents? {
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy'-'MM'-'dd' 'HH':'mm':'ss"
+        dateFormatter.locale = Locale(identifier: "en_US")
+        
+        guard let date = dateFormatter.date(from: apiDateString) else {
+            throw MyShowError.invalidDateStringFormat
+        }
+        
+        let difference = Calendar.current.dateComponents([.year, .day, .hour, .minute], from: Date(), to: date)
+        
+        return difference
         
     }
 
@@ -48,6 +146,8 @@ class MyShowsTableVC: UITableViewController {
         NetworkManager.shared.downloadImage(link: show.imgUrl) { image in
             cell.imgView.image = image
         }
+        
+        cell.nextEpisodeLabel.text = show.nextEpisodeString ?? show.status
         
         return cell
     }

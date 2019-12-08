@@ -22,3 +22,22 @@ struct Show: Codable {
     var status: String
     var image_thumbnail_path: String
 }
+
+struct ShowInfoJSON: Codable {
+    var tvShow: ShowInfo
+}
+
+struct ShowInfo: Codable {
+    var id: Int
+    var name: String
+    var description: String
+    var status: String
+    var countdown: Episode?
+}
+
+struct Episode: Codable {
+    var season: Int
+    var episode: Int
+    var name: String
+    var air_date: String
+}
