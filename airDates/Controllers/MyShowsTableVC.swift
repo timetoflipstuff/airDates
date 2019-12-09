@@ -103,8 +103,7 @@ class MyShowsTableVC: UITableViewController {
         }
         
         dispatchGroup.notify(queue: DispatchQueue.main) {
-            
-            print("notified")
+
             let updatedShows = self.coreData.getFetchedResultsController()
             
             self.myShows = updatedShows.fetchedObjects
@@ -176,9 +175,6 @@ class MyShowsTableVC: UITableViewController {
         
         showExpandedVC.airLabel.text = show.status
         
-        
-        
-        
         showExpandedVC.setupUI()
         
         navigationController?.pushViewController(showExpandedVC, animated: true)
@@ -194,7 +190,6 @@ class MyShowsTableVC: UITableViewController {
 
 extension MyShowsTableVC: AddShowVCCellDelegate {
     func didAddShow() {
-        print("MS TableView updated!")
         self.setupTableView()
     }
 }

@@ -128,7 +128,7 @@ class ShowExpandedVC: UIViewController {
         titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
         
         imgView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16).isActive = true
-        imgView.heightAnchor.constraint(equalToConstant: 200).isActive = true
+        imgView.heightAnchor.constraint(equalToConstant: 240).isActive = true
         imgView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
         
         genreLabel.topAnchor.constraint(equalTo: imgView.topAnchor).isActive = true
@@ -143,8 +143,8 @@ class ShowExpandedVC: UIViewController {
         airLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16).isActive = true
         airLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
 
-        addButton.bottomAnchor.constraint(equalTo: imgView.bottomAnchor).isActive = true
-        addButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
+        addButton.topAnchor.constraint(equalTo: airLabel.bottomAnchor, constant: 8).isActive = true
+        addButton.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16).isActive = true
         addButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
         
         nextEpisodeHeader.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
@@ -237,8 +237,6 @@ class ShowExpandedVC: UIViewController {
                         self.nextEpisodeDate.text = "Airs on \(dateFormatter.string(from: date))"
                         
                     }
-                    
-                    
                     
                 }
                 
