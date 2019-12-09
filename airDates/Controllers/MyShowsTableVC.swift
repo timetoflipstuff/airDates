@@ -166,16 +166,6 @@ class MyShowsTableVC: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let alert = UIAlertController(title: "Please wait...", message: nil, preferredStyle: .alert)
-        
-        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
-        loadingIndicator.hidesWhenStopped = true
-        loadingIndicator.style = UIActivityIndicatorView.Style.gray
-        loadingIndicator.startAnimating();
-        
-        alert.view.addSubview(loadingIndicator)
-        present(alert, animated: true, completion: nil)
-        
         let showExpandedVC = ShowExpandedVC()
         let show = myShows[indexPath.row]
 
@@ -197,20 +187,20 @@ class MyShowsTableVC: UITableViewController {
         
         showExpandedVC.airLabel.text = show.status
         
+        navigationController?.pushViewController(showExpandedVC, animated: true)
+        
         showExpandedVC.setupUI() {success in
             if success {
                 
-                alert.dismiss(animated: false) {
-                    self.navigationController?.pushViewController(showExpandedVC, animated: true)
-                }
-                
+                showExpandedVC.hideOverlayView()
                 
             } else {
                 
-                alert.dismiss(animated: false, completion: nil)
+                self.navigationController?.popViewController(animated: true)
                 
             }
         }
+        
         
         
     }

@@ -40,6 +40,9 @@ class ShowExpandedVC: UIViewController {
     var nextEpisodeTitle = UILabel()
     var nextEpisodeDate = UILabel()
     
+    private var overlayView = UIView()
+    private var overlayRect = UIView()
+    
     var showId: Int?
     var showTitle: String?
     var imgUrl: String?
@@ -48,6 +51,8 @@ class ShowExpandedVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        overlayView.frame = view.frame
         
         view.backgroundColor = .white
         
@@ -125,6 +130,8 @@ class ShowExpandedVC: UIViewController {
         subScrollView.addSubview(descHeader)
         subScrollView.addSubview(descLabel)
         
+        view.addSubview(overlayView)
+        
         scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         scrollView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         scrollView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
@@ -191,6 +198,24 @@ class ShowExpandedVC: UIViewController {
         
     }
     
+    public func hideOverlayView() {
+        
+        let shrinkAnimation = CABasicAnimation(keyPath: "opacity")
+        shrinkAnimation.duration = 0.2
+        shrinkAnimation.fromValue = 1
+        shrinkAnimation.toValue = 0
+        shrinkAnimation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        shrinkAnimation.isRemovedOnCompletion = true
+        
+        overlayView.layer.add(shrinkAnimation, forKey: nil)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.overlayView.removeFromSuperview()
+        }
+        
+        
+    }
+    
     public func setupUI(completion: @escaping(Bool) -> Void) {
         
         guard let imgUrl = imgUrl, let showId = showId, let myShows = fetchedResultsController.fetchedObjects else {return}
@@ -217,6 +242,7 @@ class ShowExpandedVC: UIViewController {
             
             if let color = image.averageColor {
                 
+                self.overlayView.backgroundColor = color
                 self.colorView.backgroundColor = color
                 self.view.backgroundColor = color
                 self.nextEpisodeHeader.textColor = color
