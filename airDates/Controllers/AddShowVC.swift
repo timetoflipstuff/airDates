@@ -60,7 +60,10 @@ extension AddShowVC: UITableViewDelegate {
         showExpandedVC.showId = show.id
         showExpandedVC.imgUrl = show.image_thumbnail_path
         
-        showExpandedVC.networkLabel.text = "\(show.network), \(show.country)"
+        if let network = show.network, let country = show.country {
+            showExpandedVC.networkLabel.text = "\(network), \(country)"
+        }
+        
         showExpandedVC.airLabel.text = show.status
         
         showExpandedVC.setupUI()
@@ -123,9 +126,34 @@ extension AddShowVC: UISearchBarDelegate {
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
             
             if searchText != "" {
-                NetworkManager.shared.getSearchQueryResults(query: searchText) { (results) in
+                NetworkManager.shared.getSearchQueryResults(query: searchText, page: 1) {results in
                     guard let results = results else { return }
                     self.shows = results.tv_shows
+                    if results.pages > 1 {
+                        
+                        let dispatchGroup = DispatchGroup()
+                        for i in 2...results.pages {
+                            
+                            dispatchGroup.enter()
+                            NetworkManager.shared.getSearchQueryResults(query: searchText, page: i) { moreResults in
+                                guard let moreResults = moreResults else {return}
+                                self.shows.append(contentsOf: moreResults.tv_shows)
+                                print("page \(i) appended!")
+                                
+                                dispatchGroup.leave()
+                            }
+                            
+                        }
+                        
+                        dispatchGroup.notify(queue: DispatchQueue.main) {
+                            
+                            DispatchQueue.main.async {
+                                self.tableView.reloadData()
+                            }
+                            
+                        }
+                        
+                    }
                     DispatchQueue.main.async {
                         self.tableView.reloadData()
                     }

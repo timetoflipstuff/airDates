@@ -20,9 +20,12 @@ class ShowExpandedVC: UIViewController {
     
     let scrollView = UIScrollView()
     let subScrollView = UIView()
+    let colorScrollView = UIScrollView()
+    let colorView = UIView()
     
     var titleLabel = UILabel()
     var imgView = UIImageView()
+    var imgViewView = UIView()
     
     var genreLabel = UILabel()
     var networkLabel = UILabel()
@@ -46,18 +49,26 @@ class ShowExpandedVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        scrollView.backgroundColor = .white
+        view.backgroundColor = .white
+        
         subScrollView.backgroundColor = .white
+        colorView.backgroundColor = .darkGray
         
         titleLabel.numberOfLines = 4
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 35)
-        networkLabel.textColor = .darkGray
-        genreLabel.textColor = .darkGray
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 45)
+        
+        titleLabel.textColor = .white
+        
+        networkLabel.textColor = .white
+        genreLabel.textColor = .white
         genreLabel.numberOfLines = 3
-        airLabel.textColor = .darkGray
-        imgView.backgroundColor = .gray
-        imgView.contentMode = .scaleAspectFill
-        imgView.clipsToBounds = true
+        airLabel.textColor = .white
+        imgView.contentMode = .scaleAspectFit
+        
+        self.imgView.layer.shadowColor = UIColor.black.cgColor
+        self.imgView.layer.shadowOpacity = 0.5
+        self.imgView.layer.shadowOffset = .zero
+        self.imgView.layer.shadowRadius = 16
         imgView.layer.cornerRadius = 4
         addButton.layer.cornerRadius = 4
         addButton.addTarget(self, action: #selector(addShow), for: .touchUpInside)
@@ -78,6 +89,7 @@ class ShowExpandedVC: UIViewController {
         
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         subScrollView.translatesAutoresizingMaskIntoConstraints = false
+        colorView.translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         imgView.translatesAutoresizingMaskIntoConstraints = false
@@ -96,14 +108,15 @@ class ShowExpandedVC: UIViewController {
         
         view.addSubview(scrollView)
         scrollView.addSubview(subScrollView)
+        subScrollView.addSubview(colorView)
         
         subScrollView.addSubview(titleLabel)
-        subScrollView.addSubview(imgView)
+        colorView.addSubview(imgView)
         
-        subScrollView.addSubview(networkLabel)
-        subScrollView.addSubview(genreLabel)
-        subScrollView.addSubview(airLabel)
-        subScrollView.addSubview(addButton)
+        colorView.addSubview(networkLabel)
+        colorView.addSubview(genreLabel)
+        colorView.addSubview(airLabel)
+        colorView.addSubview(addButton)
         
         subScrollView.addSubview(nextEpisodeHeader)
         subScrollView.addSubview(nextEpisodeTitle)
@@ -123,27 +136,33 @@ class ShowExpandedVC: UIViewController {
         subScrollView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         subScrollView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         
-        titleLabel.topAnchor.constraint(equalTo: subScrollView.topAnchor, constant: 16).isActive = true
+        colorView.topAnchor.constraint(equalTo: subScrollView.topAnchor).isActive = true
+        colorView.bottomAnchor.constraint(equalTo: addButton.bottomAnchor, constant: 32).isActive = true
+        colorView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        colorView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        
+        titleLabel.topAnchor.constraint(equalTo: subScrollView.topAnchor, constant: 32).isActive = true
         titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
         titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
         
-        imgView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16).isActive = true
-        imgView.heightAnchor.constraint(equalToConstant: 240).isActive = true
-        imgView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
+        imgView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24).isActive = true
+        imgView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
+        imgView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -170).isActive = true
+        imgView.heightAnchor.constraint(greaterThanOrEqualToConstant: 200).isActive = true
         
         genreLabel.topAnchor.constraint(equalTo: imgView.topAnchor).isActive = true
         genreLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16).isActive = true
         genreLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
         
-        networkLabel.topAnchor.constraint(equalTo: genreLabel.bottomAnchor).isActive = true
+        networkLabel.topAnchor.constraint(equalTo: genreLabel.bottomAnchor, constant: 4).isActive = true
         networkLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16).isActive = true
         networkLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
         
-        airLabel.topAnchor.constraint(equalTo: networkLabel.bottomAnchor).isActive = true
+        airLabel.topAnchor.constraint(equalTo: networkLabel.bottomAnchor, constant: 4).isActive = true
         airLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16).isActive = true
         airLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
 
-        addButton.topAnchor.constraint(equalTo: airLabel.bottomAnchor, constant: 8).isActive = true
+        addButton.topAnchor.constraint(equalTo: airLabel.bottomAnchor, constant: 12).isActive = true
         addButton.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16).isActive = true
         addButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
         
@@ -191,12 +210,20 @@ class ShowExpandedVC: UIViewController {
             NetworkManager.shared.downloadImage(link: imgUrl) {image in
                 self.imgView.image = image
                 var aspectRatio = image.size.width/image.size.height
-                if aspectRatio > 1 {
-                    aspectRatio = 1
+                if aspectRatio > 1.5 {
+                    aspectRatio = 1.5
                 }
+                
                 DispatchQueue.main.async {
                     
                     self.imgView.widthAnchor.constraint(equalTo: self.imgView.heightAnchor, multiplier: aspectRatio).isActive = true
+                    
+                    if let color = image.averageColor {
+                        self.colorView.backgroundColor = color
+                        self.view.backgroundColor = color
+                        self.nextEpisodeHeader.textColor = color
+                        self.descHeader.textColor = color
+                    }
                     
                 }
                 

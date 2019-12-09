@@ -15,10 +15,10 @@ final class NetworkManager {
     
     private init() {}
     
-    public func getSearchQueryResults(query: String, completion: @escaping (Results?) -> Void) {
+    public func getSearchQueryResults(query: String, page: Int, completion: @escaping (Results?) -> Void) {
         
         let query = query.replacingOccurrences(of: " ", with: "%20")
-        let urlString = "https://www.episodate.com/api/search?q=\(query)&page=1"
+        let urlString = "https://www.episodate.com/api/search?q=\(query)&page=\(page)"
         guard let url = URL(string: urlString) else {return}
         let request = URLRequest(url: url)
         
@@ -33,6 +33,7 @@ final class NetworkManager {
             do {
                 let objects = try JSONDecoder().decode(Results.self, from: data)
                 completion(objects)
+                
             } catch {
                 print(error)
                 return

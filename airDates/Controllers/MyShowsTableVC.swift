@@ -21,6 +21,7 @@ class MyShowsTableVC: UITableViewController {
 
         navigationItem.title = "My Shows"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(handleShowAddition))
+        navigationItem.rightBarButtonItem?.tintColor = .lightPink
         
         tableView.register(MyShowsTableVCCell.self, forCellReuseIdentifier: MyShowsTableVCCell.reuseId)
         

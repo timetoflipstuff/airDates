@@ -38,7 +38,7 @@ extension CoreDataManager {
                 showToUpdate.setValue(network ?? nil, forKey: "network")
 
                 showToUpdate.setValue(minutesTilNextEpisode ?? 1000000, forKey: "minutesTilNextEpisode")
-                showToUpdate.setValue(nextEpisodeString ?? "Not announced", forKey: "nextEpisodeString")
+                showToUpdate.setValue(nextEpisodeString ?? nil, forKey: "nextEpisodeString")
                 
                 do {
                     try context.save()

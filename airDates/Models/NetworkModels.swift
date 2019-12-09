@@ -9,6 +9,7 @@
 import Foundation
 
 struct Results: Codable {
+    var pages: Int
     var tv_shows: [Show]
 }
 
@@ -17,8 +18,8 @@ struct Show: Codable {
     var name: String
     var start_date: String?
     var end_date: String?
-    var country: String
-    var network: String
+    var country: String?
+    var network: String?
     var status: String
     var image_thumbnail_path: String
 }
@@ -32,8 +33,8 @@ struct ShowInfo: Codable {
     var name: String
     var description: String
     var genres: [String]
-    var country: String
-    var network: String
+    var country: String?
+    var network: String?
     var status: String
     var countdown: Episode?
     var episodes: [Episode]?
