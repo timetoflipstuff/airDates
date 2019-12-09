@@ -52,7 +52,6 @@ class ShowExpandedVC: UIViewController {
         view.backgroundColor = .white
         
         subScrollView.backgroundColor = .white
-        colorView.backgroundColor = .darkGray
         
         titleLabel.numberOfLines = 4
         titleLabel.font = UIFont.boldSystemFont(ofSize: 45)
@@ -192,7 +191,7 @@ class ShowExpandedVC: UIViewController {
         
     }
     
-    public func setupUI() {
+    public func setupUI(completion: @escaping(Bool) -> Void) {
         
         guard let imgUrl = imgUrl, let showId = showId, let myShows = fetchedResultsController.fetchedObjects else {return}
         
@@ -205,7 +204,29 @@ class ShowExpandedVC: UIViewController {
         addButtonActive = true
         updateTrackButton()
         
-        if imgView.image == nil {
+        let dispatchGroup = DispatchGroup()
+        
+        if let image = imgView.image {
+            
+            var aspectRatio = image.size.width/image.size.height
+            if aspectRatio > 1.5 {
+                aspectRatio = 1.5
+            }
+            
+            self.imgView.widthAnchor.constraint(equalTo: self.imgView.heightAnchor, multiplier: aspectRatio).isActive = true
+            
+            if let color = image.averageColor {
+                
+                self.colorView.backgroundColor = color
+                self.view.backgroundColor = color
+                self.nextEpisodeHeader.textColor = color
+                self.descHeader.textColor = color
+                
+            }
+            
+        } else {
+            
+            dispatchGroup.enter()
             
             NetworkManager.shared.downloadImage(link: imgUrl) {image in
                 self.imgView.image = image
@@ -219,11 +240,15 @@ class ShowExpandedVC: UIViewController {
                     self.imgView.widthAnchor.constraint(equalTo: self.imgView.heightAnchor, multiplier: aspectRatio).isActive = true
                     
                     if let color = image.averageColor {
+                        
                         self.colorView.backgroundColor = color
                         self.view.backgroundColor = color
                         self.nextEpisodeHeader.textColor = color
                         self.descHeader.textColor = color
+                        
                     }
+                    
+                    dispatchGroup.leave()
                     
                 }
                 
@@ -231,8 +256,15 @@ class ShowExpandedVC: UIViewController {
             
         }
         
+        dispatchGroup.enter()
+        
         NetworkManager.shared.getShowData(id: Int32(showId)) {showData in
-            guard let showData = showData else {return}
+            guard let showData = showData else {
+                
+                completion(false)
+                return
+                
+            }
             var genreString = ""
             
             for genre in showData.tvShow.genres {
@@ -269,8 +301,13 @@ class ShowExpandedVC: UIViewController {
                 
                 self.subScrollView.layoutIfNeeded()
                 self.scrollView.contentSize = self.subScrollView.frame.size
+                dispatchGroup.leave()
                 
             }
+        }
+        
+        dispatchGroup.notify(queue: DispatchQueue.main) {
+            completion(true)
         }
         
     }

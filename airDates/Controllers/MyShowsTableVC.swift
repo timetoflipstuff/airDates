@@ -14,6 +14,7 @@ class MyShowsTableVC: UITableViewController {
     let coreData = CoreDataManager.shared
     
     var myShows: [MOShow]!
+    var images: [UIImage?]!
 
     override func viewDidLoad() {
         
@@ -25,19 +26,22 @@ class MyShowsTableVC: UITableViewController {
         
         tableView.register(MyShowsTableVCCell.self, forCellReuseIdentifier: MyShowsTableVCCell.reuseId)
         
-        setupTableView()
+//        setupTableView()
         
     }
     
-    func setupTableView() {
+    func setupTableView(completion: @escaping (() -> Void) = {}) {
         
         myShows = []
+        images = []
         
         guard let fetchedShows = coreData.getFetchedResultsController().fetchedObjects else {return}
         
         let dispatchGroup = DispatchGroup()
         
         for fetchedShow in fetchedShows {
+            
+            images.append(nil)
             
             dispatchGroup.enter()
             
@@ -110,6 +114,9 @@ class MyShowsTableVC: UITableViewController {
             self.myShows = updatedShows.fetchedObjects
             
             self.tableView.reloadData()
+            
+            completion()
+            
         }
         
     }
@@ -149,6 +156,7 @@ class MyShowsTableVC: UITableViewController {
         cell.titleLabel.text = show.title
         NetworkManager.shared.downloadImage(link: show.imgUrl) { image in
             cell.imgView.image = image
+            self.images[indexPath.row] = image
         }
         
         cell.nextEpisodeLabel.text = show.nextEpisodeString ?? "Unannounced"
@@ -157,12 +165,25 @@ class MyShowsTableVC: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let alert = UIAlertController(title: "Please wait...", message: nil, preferredStyle: .alert)
+        
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.style = UIActivityIndicatorView.Style.gray
+        loadingIndicator.startAnimating();
+        
+        alert.view.addSubview(loadingIndicator)
+        present(alert, animated: true, completion: nil)
+        
         let showExpandedVC = ShowExpandedVC()
         let show = myShows[indexPath.row]
+
         showExpandedVC.delegate = self
         showExpandedVC.titleLabel.text = show.title
         showExpandedVC.showId = Int(show.id)
         showExpandedVC.imgUrl = show.imgUrl
+        showExpandedVC.imgView.image = self.images[indexPath.row]
         
         if let network = show.network, let country = show.country, let desc = show.desc {
             showExpandedVC.networkLabel.text = "\(network), \(country)"
@@ -176,9 +197,22 @@ class MyShowsTableVC: UITableViewController {
         
         showExpandedVC.airLabel.text = show.status
         
-        showExpandedVC.setupUI()
+        showExpandedVC.setupUI() {success in
+            if success {
+                
+                alert.dismiss(animated: false) {
+                    self.navigationController?.pushViewController(showExpandedVC, animated: true)
+                }
+                
+                
+            } else {
+                
+                alert.dismiss(animated: false, completion: nil)
+                
+            }
+        }
         
-        navigationController?.pushViewController(showExpandedVC, animated: true)
+        
     }
     
     @objc private func handleShowAddition() {

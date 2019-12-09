@@ -16,6 +16,7 @@ class AddShowVC: UIViewController {
     
     var timer: Timer?
     var shows: [Show] = []
+    var images: [UIImage?] = []
     let tableView = UITableView()
     
     var myShows: [MOShow]?
@@ -53,12 +54,24 @@ class AddShowVC: UIViewController {
 
 extension AddShowVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let alert = UIAlertController(title: "Please wait...", message: nil, preferredStyle: .alert)
+        
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.style = UIActivityIndicatorView.Style.gray
+        loadingIndicator.startAnimating();
+        
+        alert.view.addSubview(loadingIndicator)
+        present(alert, animated: true, completion: nil)
+        
         let showExpandedVC = ShowExpandedVC()
         let show = shows[indexPath.row]
         showExpandedVC.delegate = self
         showExpandedVC.titleLabel.text = show.name
         showExpandedVC.showId = show.id
         showExpandedVC.imgUrl = show.image_thumbnail_path
+        showExpandedVC.imgView.image = self.images[indexPath.row]
         
         if let network = show.network, let country = show.country {
             showExpandedVC.networkLabel.text = "\(network), \(country)"
@@ -66,9 +79,23 @@ extension AddShowVC: UITableViewDelegate {
         
         showExpandedVC.airLabel.text = show.status
         
-        showExpandedVC.setupUI()
+        showExpandedVC.setupUI() {success in
+            
+            if success {
+                
+                alert.dismiss(animated: false) {
+                    self.navigationController?.pushViewController(showExpandedVC, animated: true)
+                }
+                
+                
+            } else {
+                
+                alert.dismiss(animated: false, completion: nil)
+                
+            }
+            
+        }
         
-        navigationController?.pushViewController(showExpandedVC, animated: true)
     }
 }
 
@@ -89,6 +116,7 @@ extension AddShowVC: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: AddShowVCCell.reuseId, for: indexPath) as! AddShowVCCell
         
         cell.delegate = self
+        cell.selectionStyle = .none
         
         if let myShows = myShows {
             
@@ -109,6 +137,7 @@ extension AddShowVC: UITableViewDataSource {
         
         NetworkManager.shared.downloadImage(link: show.image_thumbnail_path) { image in
             cell.imgView.image = image
+            self.images[indexPath.row] = image
         }
         
         cell.titleLabel.text = show.name
@@ -129,6 +158,9 @@ extension AddShowVC: UISearchBarDelegate {
                 NetworkManager.shared.getSearchQueryResults(query: searchText, page: 1) {results in
                     guard let results = results else { return }
                     self.shows = results.tv_shows
+                    for _ in self.shows {
+                        self.images.append(nil)
+                    }
                     if results.pages > 1 {
                         
                         let dispatchGroup = DispatchGroup()
@@ -138,7 +170,9 @@ extension AddShowVC: UISearchBarDelegate {
                             NetworkManager.shared.getSearchQueryResults(query: searchText, page: i) { moreResults in
                                 guard let moreResults = moreResults else {return}
                                 self.shows.append(contentsOf: moreResults.tv_shows)
-                                print("page \(i) appended!")
+                                for _ in moreResults.tv_shows {
+                                    self.images.append(nil)
+                                }
                                 
                                 dispatchGroup.leave()
                             }
@@ -160,6 +194,7 @@ extension AddShowVC: UISearchBarDelegate {
                 }
             } else {
                 self.shows = []
+                self.images = []
                 self.tableView.reloadData()
             }
             
