@@ -21,7 +21,7 @@ final class CoreDataManager {
 // MARK: - Public methods
 extension CoreDataManager {
     
-    public func updateShow(id: Int32, desc: String, minutesTilNextEpisode: NSNumber?, nextEpisodeString: String?, status: String?, completion: @escaping(Bool) -> Void) {
+    public func updateShow(id: Int32, desc: String, minutesTilNextEpisode: NSNumber?, nextEpisodeString: String?, status: String?, country: String?, network: String?, completion: @escaping(Bool) -> Void) {
         
         stack.persistentContainer.performBackgroundTask { (context) in
             let fetchRequest = NSFetchRequest<MOShow>(entityName: "Show")
@@ -34,12 +34,11 @@ extension CoreDataManager {
                 showToUpdate.setValue(desc, forKey: "desc")
                 showToUpdate.setValue(status, forKey: "status")
                 
-                if let minutesTilNextEpisode = minutesTilNextEpisode {
-                    showToUpdate.setValue(minutesTilNextEpisode, forKey: "minutesTilNextEpisode")
-                }
-                if let nextEpisodeString = nextEpisodeString {
-                    showToUpdate.setValue(nextEpisodeString, forKey: "nextEpisodeString")
-                }
+                showToUpdate.setValue(country ?? nil, forKey: "country")
+                showToUpdate.setValue(network ?? nil, forKey: "network")
+
+                showToUpdate.setValue(minutesTilNextEpisode ?? 1000000, forKey: "minutesTilNextEpisode")
+                showToUpdate.setValue(nextEpisodeString ?? "Not announced", forKey: "nextEpisodeString")
                 
                 do {
                     try context.save()
@@ -57,13 +56,14 @@ extension CoreDataManager {
         
     }
     
-    public func saveShow(id: Int32, title: String, imgUrl: String, completion: @escaping(Bool) -> Void) {
+    public func saveShow(id: Int32, title: String, imgUrl: String, status: String?, completion: @escaping(Bool) -> Void) {
         
         stack.persistentContainer.performBackgroundTask { (context) in
             let show = MOShow(context: context)
             show.id = id
             show.title = title
             show.imgUrl = imgUrl
+            show.status = status
             
             do {
                 try context.save()

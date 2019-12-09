@@ -39,7 +39,7 @@ class MyShowsTableVCCell: UITableViewCell{
         
         imgView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8).isActive = true
         imgView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8).isActive = true
-        imgView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8).isActive = true
+        imgView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16).isActive = true
         imgView.widthAnchor.constraint(equalTo: imgView.heightAnchor, multiplier: 0.675).isActive = true
         
         titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16).isActive = true

@@ -8,7 +8,11 @@
 
 import UIKit
 
+
+
 class AddShowVC: UIViewController {
+    
+    weak var delegate: AddShowVCCellDelegate?
     
     var timer: Timer?
     var shows: [Show] = []
@@ -48,7 +52,21 @@ class AddShowVC: UIViewController {
 }
 
 extension AddShowVC: UITableViewDelegate {
-    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let showExpandedVC = ShowExpandedVC()
+        let show = shows[indexPath.row]
+        showExpandedVC.delegate = self
+        showExpandedVC.titleLabel.text = show.name
+        showExpandedVC.showId = show.id
+        showExpandedVC.imgUrl = show.image_thumbnail_path
+        
+        showExpandedVC.networkLabel.text = "\(show.network), \(show.country)"
+        showExpandedVC.airLabel.text = show.status
+        
+        showExpandedVC.setupUI()
+        
+        navigationController?.pushViewController(showExpandedVC, animated: true)
+    }
 }
 
 extension AddShowVC: UITableViewDataSource {
@@ -66,13 +84,20 @@ extension AddShowVC: UITableViewDataSource {
         let show = shows[indexPath.row]
         
         let cell = tableView.dequeueReusableCell(withIdentifier: AddShowVCCell.reuseId, for: indexPath) as! AddShowVCCell
+        
+        cell.delegate = self
+        
         if let myShows = myShows {
+            
             for myShow in myShows {
                 if myShow.id == Int32(show.id) {
                     cell.isTracked = true
-                    cell.updateTrackButton()
                 }
             }
+            
+            cell.addButtonActive = true
+            cell.updateTrackButton()
+
         }
         
         cell.showId = show.id
@@ -96,13 +121,11 @@ extension AddShowVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-            print(searchText)
             
             if searchText != "" {
                 NetworkManager.shared.getSearchQueryResults(query: searchText) { (results) in
                     guard let results = results else { return }
                     self.shows = results.tv_shows
-                    print(self.shows.count)
                     DispatchQueue.main.async {
                         self.tableView.reloadData()
                     }
@@ -114,7 +137,10 @@ extension AddShowVC: UISearchBarDelegate {
             
         }
     }
-    
-    
-    
+}
+
+extension AddShowVC: AddShowVCCellDelegate {
+    func didAddShow() {
+        self.delegate?.didAddShow()
+    }
 }

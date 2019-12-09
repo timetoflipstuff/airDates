@@ -31,8 +31,12 @@ struct ShowInfo: Codable {
     var id: Int
     var name: String
     var description: String
+    var genres: [String]
+    var country: String
+    var network: String
     var status: String
     var countdown: Episode?
+    var episodes: [Episode]?
 }
 
 struct Episode: Codable {

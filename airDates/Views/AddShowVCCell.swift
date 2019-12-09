@@ -8,9 +8,17 @@
 
 import UIKit
 
+protocol AddShowVCCellDelegate: AnyObject {
+    func didAddShow()
+}
+
 class AddShowVCCell: UITableViewCell{
     
     public static let reuseId = "AddShowCell"
+    
+    weak var delegate: AddShowVCCellDelegate?
+    
+    var addButtonActive = false
     
     var isTracked = false
     
@@ -50,7 +58,7 @@ class AddShowVCCell: UITableViewCell{
         
         imgView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8).isActive = true
         imgView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8).isActive = true
-        imgView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8).isActive = true
+        imgView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16).isActive = true
         imgView.widthAnchor.constraint(equalTo: imgView.heightAnchor, multiplier: 0.675).isActive = true
         
         titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16).isActive = true
@@ -63,26 +71,62 @@ class AddShowVCCell: UITableViewCell{
         
         addButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16).isActive = true
         addButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16).isActive = true
-        addButton.heightAnchor.constraint(equalTo: airLabel.heightAnchor).isActive = true
         addButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
         
     }
     
     @objc private func addShow() {
-
-        guard let id = showId, let title = titleLabel.text, let imgUrl = imgUrl else {return}
-        isTracked = !isTracked
         
-        updateTrackButton()
-        
-        if isTracked {
+        if addButtonActive {
             
-            CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl) {success in
+            guard let id = showId, let title = titleLabel.text, let imgUrl = imgUrl else {return}
+            isTracked = !isTracked
+            
+            updateTrackButton()
+            
+            if isTracked {
                 
-                if success {
+                addButtonActive = false
+                CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl, status: airLabel.text ?? nil) {success in
                     
-                    self.isTracked = true
-                    self.updateTrackButton()
+                    if success {
+                        
+                        DispatchQueue.main.async {
+                            self.isTracked = true
+                            self.delegate?.didAddShow()
+                            self.updateTrackButton()
+                        }
+                        
+                    } else {
+                        
+                        self.isTracked = !self.isTracked
+                        
+                    }
+                    
+                    self.addButtonActive = true
+                    
+                }
+                
+            } else {
+                
+                self.addButtonActive = false
+                CoreDataManager.shared.deleteShow(id: Int32(id)) {success in
+                    
+                    if success {
+                        
+                        DispatchQueue.main.async {
+                            self.isTracked = false
+                            self.delegate?.didAddShow()
+                            self.updateTrackButton()
+                        }
+                        
+                    } else {
+                        
+                        self.isTracked = !self.isTracked
+                        
+                    }
+                    
+                    self.addButtonActive = true
                     
                 }
                 
@@ -90,16 +134,7 @@ class AddShowVCCell: UITableViewCell{
             
         } else {
             
-            CoreDataManager.shared.deleteShow(id: Int32(id)) {success in
-                
-                if success {
-                    
-                    self.isTracked = false
-                    self.updateTrackButton()
-                    
-                }
-                
-            }
+            updateTrackButton()
             
         }
         
@@ -107,15 +142,24 @@ class AddShowVCCell: UITableViewCell{
     
     public func updateTrackButton() {
         
-        if isTracked {
+        if addButtonActive {
             
-            self.addButton.backgroundColor = .gray
-            self.addButton.setTitle("Untrack", for: UIControl.State.normal)
+            if isTracked {
+                
+                self.addButton.backgroundColor = .gray
+                self.addButton.setTitle("Untrack", for: UIControl.State.normal)
+                
+            } else {
+                
+                self.addButton.backgroundColor = .black
+                self.addButton.setTitle("Track", for: UIControl.State.normal)
+                
+            }
             
         } else {
             
-            self.addButton.backgroundColor = .black
-            self.addButton.setTitle("Track", for: UIControl.State.normal)
+            self.addButton.backgroundColor = .gray
+            self.addButton.setTitle("Unavailable", for: UIControl.State.normal)
             
         }
         

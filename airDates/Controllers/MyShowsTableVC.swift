@@ -18,8 +18,7 @@ class MyShowsTableVC: UITableViewController {
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        
-        navigationController?.navigationBar.prefersLargeTitles = true
+
         navigationItem.title = "My Shows"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(handleShowAddition))
         
@@ -54,6 +53,8 @@ class MyShowsTableVC: UITableViewController {
                 var nextEpisodeString: String? = nil
                 let status = showData.tvShow.status
                 let desc = showData.tvShow.description
+                let country = showData.tvShow.country
+                let network = showData.tvShow.network
                 
                 if let countdown = showData.tvShow.countdown {
                     
@@ -93,7 +94,7 @@ class MyShowsTableVC: UITableViewController {
                     
                 }
                 
-                CoreDataManager.shared.updateShow(id: fetchedShow.id, desc: desc, minutesTilNextEpisode: minutesTilNextEpisode, nextEpisodeString: nextEpisodeString, status: status) {_ in
+                CoreDataManager.shared.updateShow(id: fetchedShow.id, desc: desc, minutesTilNextEpisode: minutesTilNextEpisode, nextEpisodeString: nextEpisodeString, status: status, country: country, network:network) {_ in
                     dispatchGroup.leave()
                 }
                 
@@ -102,6 +103,8 @@ class MyShowsTableVC: UITableViewController {
         }
         
         dispatchGroup.notify(queue: DispatchQueue.main) {
+            
+            print("notified")
             let updatedShows = self.coreData.getFetchedResultsController()
             
             self.myShows = updatedShows.fetchedObjects
@@ -153,9 +156,45 @@ class MyShowsTableVC: UITableViewController {
         return cell
     }
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let showExpandedVC = ShowExpandedVC()
+        let show = myShows[indexPath.row]
+        showExpandedVC.delegate = self
+        showExpandedVC.titleLabel.text = show.title
+        showExpandedVC.showId = Int(show.id)
+        showExpandedVC.imgUrl = show.imgUrl
+        
+        if let network = show.network, let country = show.country, let desc = show.desc {
+            showExpandedVC.networkLabel.text = "\(network), \(country)"
+            
+            let descString = desc.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
+            
+            showExpandedVC.descLabel.text = descString
+        } else {
+            showExpandedVC.networkLabel.text = "Unknown"
+        }
+        
+        showExpandedVC.airLabel.text = show.status
+        
+        
+        
+        
+        showExpandedVC.setupUI()
+        
+        navigationController?.pushViewController(showExpandedVC, animated: true)
+    }
+    
     @objc private func handleShowAddition() {
-        navigationController?.pushViewController(AddShowVC(), animated: true)
+        let addShowVC = AddShowVC()
+        addShowVC.delegate = self
+        navigationController?.pushViewController(addShowVC, animated: true)
     }
     
 }
 
+extension MyShowsTableVC: AddShowVCCellDelegate {
+    func didAddShow() {
+        print("MS TableView updated!")
+        self.setupTableView()
+    }
+}
