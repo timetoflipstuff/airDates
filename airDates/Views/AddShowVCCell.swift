@@ -51,7 +51,7 @@ class AddShowVCCell: UITableViewCell{
         imgView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8).isActive = true
         imgView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8).isActive = true
         imgView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8).isActive = true
-        imgView.widthAnchor.constraint(equalTo: imgView.heightAnchor).isActive = true
+        imgView.widthAnchor.constraint(equalTo: imgView.heightAnchor, multiplier: 0.675).isActive = true
         
         titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16).isActive = true
         titleLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16).isActive = true

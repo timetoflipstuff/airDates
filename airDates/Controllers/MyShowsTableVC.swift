@@ -62,11 +62,8 @@ class MyShowsTableVC: UITableViewController {
                     dateFormatter.locale = Locale(identifier: "en_US")
                     
                     do {
-                        print("going for the difference")
                         if let difference = try self.getTimeTilNextEpisode(apiDateString: countdown.air_date) {
-                            print("going for the days, hours etc")
                             if let years = difference.year, let days = difference.day, let hours = difference.hour, let minutes = difference.minute {
-                                print("got in, what the fuck then")
                                 let countdownInMinutes = years*525600 + days*1440 + hours*60 + minutes
                                 minutesTilNextEpisode = countdownInMinutes as NSNumber
                                 let countdown: String
@@ -82,11 +79,12 @@ class MyShowsTableVC: UITableViewController {
                                     countdown = "\(hours) hours"
                                 } else if hours == 1 {
                                     countdown = "1 hour"
-                                } else {
+                                } else if minutes > 1 {
                                     countdown = "\(minutes) minutes"
+                                } else {
+                                    countdown = "1 minute"
                                 }
                                 nextEpisodeString = "New episode in \(countdown)"
-                                print("\(showData.tvShow.name) \(nextEpisodeString ?? "none") \(Int(minutesTilNextEpisode ?? 0))")
                             }
                         }
                     } catch {
@@ -118,10 +116,13 @@ class MyShowsTableVC: UITableViewController {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy'-'MM'-'dd' 'HH':'mm':'ss"
         dateFormatter.locale = Locale(identifier: "en_US")
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
         
         guard let date = dateFormatter.date(from: apiDateString) else {
             throw MyShowError.invalidDateStringFormat
         }
+        
+        dateFormatter.timeZone = TimeZone.current
         
         let difference = Calendar.current.dateComponents([.year, .day, .hour, .minute], from: Date(), to: date)
         
@@ -147,7 +148,7 @@ class MyShowsTableVC: UITableViewController {
             cell.imgView.image = image
         }
         
-        cell.nextEpisodeLabel.text = show.nextEpisodeString ?? show.status
+        cell.nextEpisodeLabel.text = show.nextEpisodeString ?? "Unannounced"
         
         return cell
     }

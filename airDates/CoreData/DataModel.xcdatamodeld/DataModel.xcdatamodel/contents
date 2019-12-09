@@ -5,11 +5,12 @@
         <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="imgUrl" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="minutesTilNextEpisode" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="network" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="nextEpisodeString" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="status" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Show" positionX="-54" positionY="-9" width="128" height="150"/>
+        <element name="Show" positionX="-54" positionY="-9" width="128" height="165"/>
     </elements>
 </model>
