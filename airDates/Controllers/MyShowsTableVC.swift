@@ -19,6 +19,16 @@ class MyShowsTableVC: UITableViewController {
     override func viewDidLoad() {
         
         super.viewDidLoad()
+        
+        let refreshControl = UIRefreshControl()
+        
+        if #available(iOS 10.0, *) {
+            tableView.refreshControl = refreshControl
+        } else {
+            tableView.addSubview(refreshControl)
+        }
+        
+        refreshControl.addTarget(self, action: #selector(refreshShowTable), for: .valueChanged)
 
         navigationItem.title = "My Shows"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(handleShowAddition))
@@ -30,9 +40,16 @@ class MyShowsTableVC: UITableViewController {
         
     }
     
+    @objc private func refreshShowTable() {
+        
+        setupTableView() {
+            self.refreshControl?.endRefreshing()
+        }
+        
+    }
+    
     func setupTableView(completion: @escaping (() -> Void) = {}) {
         
-        myShows = []
         images = []
         
         guard let fetchedShows = coreData.getFetchedResultsController().fetchedObjects else {return}
@@ -156,7 +173,10 @@ class MyShowsTableVC: UITableViewController {
         cell.titleLabel.text = show.title
         NetworkManager.shared.downloadImage(link: show.imgUrl) { image in
             cell.imgView.image = image
-            self.images[indexPath.row] = image
+            if self.images.count > indexPath.row {
+                self.images[indexPath.row] = image
+            }
+            
         }
         
         cell.nextEpisodeLabel.text = show.nextEpisodeString ?? "Unannounced"
@@ -173,7 +193,11 @@ class MyShowsTableVC: UITableViewController {
         showExpandedVC.titleLabel.text = show.title
         showExpandedVC.showId = Int(show.id)
         showExpandedVC.imgUrl = show.imgUrl
-        showExpandedVC.imgView.image = self.images[indexPath.row]
+        
+        if self.images.count > indexPath.row {
+            showExpandedVC.imgView.image = self.images[indexPath.row]
+        }
+        
         
         if let network = show.network, let country = show.country, let desc = show.desc {
             showExpandedVC.networkLabel.text = "\(network), \(country)"

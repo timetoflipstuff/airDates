@@ -61,7 +61,11 @@ extension AddShowVC: UITableViewDelegate {
         showExpandedVC.titleLabel.text = show.name
         showExpandedVC.showId = show.id
         showExpandedVC.imgUrl = show.image_thumbnail_path
-        showExpandedVC.imgView.image = self.images[indexPath.row]
+        
+        if self.images.count > indexPath.row {
+            showExpandedVC.imgView.image = self.images[indexPath.row]
+        }
+        
         
         if let network = show.network, let country = show.country {
             showExpandedVC.networkLabel.text = "\(network), \(country)"
@@ -126,7 +130,10 @@ extension AddShowVC: UITableViewDataSource {
         
         NetworkManager.shared.downloadImage(link: show.image_thumbnail_path) { image in
             cell.imgView.image = image
-            self.images[indexPath.row] = image
+            
+            if self.images.count > indexPath.row {
+                self.images[indexPath.row] = image
+            }
         }
         
         cell.titleLabel.text = show.name
@@ -146,6 +153,7 @@ extension AddShowVC: UISearchBarDelegate {
             if searchText != "" {
                 NetworkManager.shared.getSearchQueryResults(query: searchText, page: 1) {results in
                     guard let results = results else { return }
+                    self.images = []
                     self.shows = results.tv_shows
                     for _ in self.shows {
                         self.images.append(nil)

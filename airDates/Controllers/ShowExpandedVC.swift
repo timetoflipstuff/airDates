@@ -218,9 +218,6 @@ class ShowExpandedVC: UIViewController {
             self.overlayView.removeFromSuperview()
         }
         
-//        overlayView.removeFromSuperview()
-        
-        
     }
     
     public func setupUI(completion: @escaping(Bool) -> Void) {
