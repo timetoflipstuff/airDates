@@ -20,6 +20,8 @@ class MyShowsTableVC: UITableViewController {
         
         super.viewDidLoad()
         
+        view.backgroundColor = .white
+        
         let refreshControl = UIRefreshControl()
         
         if #available(iOS 10.0, *) {
