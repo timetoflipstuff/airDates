@@ -21,7 +21,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController = rootViewController
         
         rootViewController.mainViewController.setupTableView {
-            rootViewController.initialViewController.animateFade()
             rootViewController.switchToMainScreen()
         }
         

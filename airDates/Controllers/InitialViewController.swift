@@ -29,22 +29,4 @@ class InitialViewController: UIViewController {
         
     }
     
-    func animateFade() {
-        
-        let expandAnimation = CABasicAnimation(keyPath: "transform.scale")
-        expandAnimation.duration = 0.3
-        expandAnimation.fromValue = 1
-        expandAnimation.toValue = 3
-        expandAnimation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
-        expandAnimation.isRemovedOnCompletion = true
-        
-        nameLabel.layer.add(expandAnimation, forKey: nil)
-        
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            self.nameLabel.removeFromSuperview()
-        }
-        
-    }
-    
 }
