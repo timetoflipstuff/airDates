@@ -16,11 +16,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        window?.rootViewController = InitialViewController()
+        let rootViewController = RootViewController()
         
-        let myShowsTableVC = MyShowsTableVC()
-        myShowsTableVC.setupTableView {
-            self.window?.rootViewController = UINavigationController(rootViewController: myShowsTableVC)
+        window?.rootViewController = rootViewController
+        
+        rootViewController.mainViewController.setupTableView {
+            rootViewController.initialViewController.animateFade()
+            rootViewController.switchToMainScreen()
         }
         
         return true

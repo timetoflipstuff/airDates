@@ -52,8 +52,6 @@ class ShowExpandedVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        overlayView.frame = view.frame
-        
         view.backgroundColor = .white
         
         subScrollView.backgroundColor = .white
@@ -90,6 +88,8 @@ class ShowExpandedVC: UIViewController {
         descLabel.numberOfLines = 0
         descLabel.text = ""
         descLabel.textColor = .darkGray
+        
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
         
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         subScrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -131,6 +131,11 @@ class ShowExpandedVC: UIViewController {
         subScrollView.addSubview(descLabel)
         
         view.addSubview(overlayView)
+        
+        overlayView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor).isActive = true
+        overlayView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        overlayView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        overlayView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
         scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         scrollView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
@@ -201,17 +206,19 @@ class ShowExpandedVC: UIViewController {
     public func hideOverlayView() {
         
         let shrinkAnimation = CABasicAnimation(keyPath: "opacity")
-        shrinkAnimation.duration = 0.2
+        shrinkAnimation.duration = 0.3
         shrinkAnimation.fromValue = 1
         shrinkAnimation.toValue = 0
         shrinkAnimation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
         shrinkAnimation.isRemovedOnCompletion = true
-        
+
         overlayView.layer.add(shrinkAnimation, forKey: nil)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             self.overlayView.removeFromSuperview()
         }
+        
+//        overlayView.removeFromSuperview()
         
         
     }

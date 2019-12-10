@@ -24,6 +24,7 @@
 		E6AE59BC239B2B13007C01E3 /* ShowExpandedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE59BB239B2B13007C01E3 /* ShowExpandedVC.swift */; };
 		E6AE59BE239BD718007C01E3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE59BD239BD718007C01E3 /* Extensions.swift */; };
 		E6AE59C4239EFBFA007C01E3 /* InitialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE59C3239EFBFA007C01E3 /* InitialViewController.swift */; };
+		E6AE59C8239F168B007C01E3 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE59C7239F168B007C01E3 /* RootViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,7 @@
 		E6AE59BB239B2B13007C01E3 /* ShowExpandedVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowExpandedVC.swift; sourceTree = "<group>"; };
 		E6AE59BD239BD718007C01E3 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		E6AE59C3239EFBFA007C01E3 /* InitialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialViewController.swift; sourceTree = "<group>"; };
+		E6AE59C7239F168B007C01E3 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +127,7 @@
 				E6AE59B1239A912E007C01E3 /* AddShowVC.swift */,
 				E6AE59BB239B2B13007C01E3 /* ShowExpandedVC.swift */,
 				E6AE59C3239EFBFA007C01E3 /* InitialViewController.swift */,
+				E6AE59C7239F168B007C01E3 /* RootViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -224,6 +227,7 @@
 				E6AE59B6239AA34D007C01E3 /* NetworkManager.swift in Sources */,
 				E6AE59B2239A912E007C01E3 /* AddShowVC.swift in Sources */,
 				E6AE59AA239A8D0F007C01E3 /* DataModel.xcdatamodeld in Sources */,
+				E6AE59C8239F168B007C01E3 /* RootViewController.swift in Sources */,
 				E6AE5993239A87A0007C01E3 /* MyShowsTableVC.swift in Sources */,
 				E6AE5991239A87A0007C01E3 /* AppDelegate.swift in Sources */,
 				E6AE59BC239B2B13007C01E3 /* ShowExpandedVC.swift in Sources */,
