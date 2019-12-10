@@ -54,6 +54,8 @@ class ShowExpandedVC: UIViewController {
         
         view.backgroundColor = .white
         
+        navigationController?.navigationBar.tintColor = .lightPink
+        
         subScrollView.backgroundColor = .white
         
         titleLabel.numberOfLines = 4

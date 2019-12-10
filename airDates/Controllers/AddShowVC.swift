@@ -35,6 +35,8 @@ class AddShowVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        navigationController?.navigationBar.tintColor = .lightPink
+        
         view.backgroundColor = .white
         setupSearchBar()
         tableView.frame = view.safeAreaLayoutGuide.layoutFrame
