@@ -14,7 +14,11 @@ class InitialViewController: UIViewController {
     
     override func viewDidLoad() {
         
-        view.backgroundColor = .white
+        if #available(iOS 13.0, *) {
+            view.backgroundColor = .systemBackground
+        } else {
+            view.backgroundColor = .white
+        }
         
         nameLabel.font = nameLabel.font.withSize(45)
         nameLabel.textColor = .lightPink

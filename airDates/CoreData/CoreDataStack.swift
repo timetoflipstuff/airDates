@@ -12,7 +12,7 @@ final class CoreDataStack {
     
     static let shared = CoreDataStack()
     
-    public let persistentContainer: NSPersistentContainer
+    let persistentContainer: NSPersistentContainer
     
     private init() {
         persistentContainer = NSPersistentContainer(name: "DataModel")

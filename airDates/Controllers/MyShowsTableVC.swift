@@ -20,7 +20,12 @@ class MyShowsTableVC: UITableViewController {
         
         super.viewDidLoad()
         
-        view.backgroundColor = .white
+        if #available(iOS 13.0, *) {
+            view.backgroundColor = .systemBackground
+        } else {
+            view.backgroundColor = .white
+        }
+        tableView.tableFooterView = UIView()
         
         let refreshControl = UIRefreshControl()
         
@@ -37,9 +42,6 @@ class MyShowsTableVC: UITableViewController {
         navigationItem.rightBarButtonItem?.tintColor = .lightPink
         
         tableView.register(MyShowsTableVCCell.self, forCellReuseIdentifier: MyShowsTableVCCell.reuseId)
-        
-//        setupTableView()
-        
     }
     
     @objc private func refreshShowTable() {
@@ -51,112 +53,23 @@ class MyShowsTableVC: UITableViewController {
     }
     
     func setupTableView(completion: @escaping (() -> Void) = {}) {
-        
-        images = []
-        
-        guard let fetchedShows = coreData.getFetchedResultsController().fetchedObjects else {return}
-        
-        let dispatchGroup = DispatchGroup()
-        
-        for fetchedShow in fetchedShows {
-            
-            images.append(nil)
-            
-            dispatchGroup.enter()
-            
-            NetworkManager.shared.getShowData(id: fetchedShow.id) {showData in
-                
-                guard let showData = showData else {
-                    
-                    dispatchGroup.leave()
-                    return
-                    
-                }
-                
-                var minutesTilNextEpisode: NSNumber? = 1000000
-                var nextEpisodeString: String? = nil
-                let status = showData.tvShow.status
-                let desc = showData.tvShow.description
-                let country = showData.tvShow.country
-                let network = showData.tvShow.network
-                
-                if let countdown = showData.tvShow.countdown {
-                    
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.dateFormat = "yyyy'-'MM'-'dd' 'HH':'mm':'ss"
-                    dateFormatter.locale = Locale(identifier: "en_US")
-                    
-                    do {
-                        if let difference = try self.getTimeTilNextEpisode(apiDateString: countdown.air_date) {
-                            if let years = difference.year, let days = difference.day, let hours = difference.hour, let minutes = difference.minute {
-                                let countdownInMinutes = years*525600 + days*1440 + hours*60 + minutes
-                                minutesTilNextEpisode = countdownInMinutes as NSNumber
-                                let countdown: String
-                                if years > 1 {
-                                    countdown = "\(years) years"
-                                } else if years == 1 {
-                                    countdown = "1 year"
-                                } else if days > 1 {
-                                    countdown = "\(days) days"
-                                } else if days == 1 {
-                                    countdown = "1 day"
-                                } else if hours > 1 {
-                                    countdown = "\(hours) hours"
-                                } else if hours == 1 {
-                                    countdown = "1 hour"
-                                } else if minutes > 1 {
-                                    countdown = "\(minutes) minutes"
-                                } else {
-                                    countdown = "1 minute"
-                                }
-                                nextEpisodeString = "New episode in \(countdown)"
-                            }
-                        }
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                    
-                }
-                
-                CoreDataManager.shared.updateShow(id: fetchedShow.id, desc: desc, minutesTilNextEpisode: minutesTilNextEpisode, nextEpisodeString: nextEpisodeString, status: status, country: country, network:network) {_ in
-                    dispatchGroup.leave()
-                }
-                
-            }
-            
-        }
-        
-        dispatchGroup.notify(queue: DispatchQueue.main) {
 
-            let updatedShows = self.coreData.getFetchedResultsController()
-            
-            self.myShows = updatedShows.fetchedObjects
-            
+        images = []
+        myShows = []
+
+        coreData.updateSavedShowData() {
+
+            guard let fetchedShows = self.coreData.getFetchedResultsController().fetchedObjects else { return }
+
+            self.myShows = fetchedShows
+
+            for _ in fetchedShows {
+                self.images.append(nil)
+            }
+
             self.tableView.reloadData()
-            
             completion()
-            
         }
-        
-    }
-    
-    func getTimeTilNextEpisode(apiDateString: String) throws -> DateComponents? {
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy'-'MM'-'dd' 'HH':'mm':'ss"
-        dateFormatter.locale = Locale(identifier: "en_US")
-        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-        
-        guard let date = dateFormatter.date(from: apiDateString) else {
-            throw MyShowError.invalidDateStringFormat
-        }
-        
-        dateFormatter.timeZone = TimeZone.current
-        
-        let difference = Calendar.current.dateComponents([.year, .day, .hour, .minute], from: Date(), to: date)
-        
-        return difference
-        
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -226,9 +139,6 @@ class MyShowsTableVC: UITableViewController {
                 
             }
         }
-        
-        
-        
     }
     
     @objc private func handleShowAddition() {

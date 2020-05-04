@@ -21,13 +21,21 @@ class MyShowsTableVCCell: UITableViewCell{
         
         titleLabel.numberOfLines = 2
         titleLabel.font = titleLabel.font.withSize(24)
-        nextEpisodeLabel.textColor = .darkGray
         imgView.backgroundColor = .gray
         imgView.contentMode = .scaleAspectFill
         imgView.clipsToBounds = true
         imgView.layer.cornerRadius = 4
+        
+        if #available(iOS 13, *) {
+            contentView.backgroundColor = .systemBackground
+            titleLabel.textColor = .label
+            nextEpisodeLabel.textColor = .secondaryLabel
+        } else {
+            contentView.backgroundColor = .white
+            titleLabel.textColor = .black
+            nextEpisodeLabel.textColor = .darkGray
+        }
 
-        contentView.backgroundColor = .white
         contentView.addSubview(imgView)
 
         contentView.addSubview(titleLabel)

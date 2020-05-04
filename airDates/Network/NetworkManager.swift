@@ -15,7 +15,7 @@ final class NetworkManager {
     
     private init() {}
     
-    public func getSearchQueryResults(query: String, page: Int, completion: @escaping (Results?) -> Void) {
+    func getSearchQueryResults(query: String, page: Int, completion: @escaping (Results?) -> Void) {
         
         let query = query.replacingOccurrences(of: " ", with: "%20")
         let urlString = "https://www.episodate.com/api/search?q=\(query)&page=\(page)"
@@ -44,7 +44,7 @@ final class NetworkManager {
 
     }
     
-    public func downloadImage(link: String, completion: @escaping(UIImage) -> Void) {
+    func downloadImage(link: String, completion: @escaping(UIImage) -> Void) {
         
         let url = URL(string: link)
         let request = URLRequest(url: url!)
@@ -62,7 +62,7 @@ final class NetworkManager {
         
     }
     
-    public func getShowData(id: Int32, completion: @escaping(ShowInfoJSON?) -> Void) {
+    func getShowData(id: Int32, completion: @escaping(ShowInfoJSON?) -> Void) {
         
         let url = URL(string: "https://www.episodate.com/api/show-details?q=\(id)")
         let request = URLRequest(url: url!)

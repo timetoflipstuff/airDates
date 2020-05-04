@@ -13,6 +13,12 @@ enum MyShowError: Error {
     case invalidDateStringFormat
 }
 
+enum AddShowButtonState {
+    case tracking
+    case notTracking
+    case inactive
+}
+
 extension UIColor {
     static let lightPink = UIColor(red: 255/255, green: 105/255, blue: 220/255, alpha: 1)
 }
@@ -26,7 +32,7 @@ extension UIImage {
         guard let outputImage = filter.outputImage else { return nil }
         
         var bitmap = [UInt8](repeating: 0, count: 4)
-        let context = CIContext(options: [.workingColorSpace: kCFNull])
+        let context = CIContext(options: [.workingColorSpace: kCFNull as Any])
         context.render(outputImage, toBitmap: &bitmap, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1), format: .RGBA8, colorSpace: nil)
         
         return UIColor(red: CGFloat(bitmap[0]) / 255, green: CGFloat(bitmap[1]) / 255, blue: CGFloat(bitmap[2]) / 255, alpha: CGFloat(bitmap[3]) / 255)

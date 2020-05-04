@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E6A219E1245F9058002E383F /* AddShowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6A219E0245F9058002E383F /* AddShowButton.swift */; };
+		E6A219E3245FBA87002E383F /* ModelHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6A219E2245FBA87002E383F /* ModelHelper.swift */; };
 		E6AE5991239A87A0007C01E3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE5990239A87A0007C01E3 /* AppDelegate.swift */; };
 		E6AE5993239A87A0007C01E3 /* MyShowsTableVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE5992239A87A0007C01E3 /* MyShowsTableVC.swift */; };
 		E6AE5996239A87A0007C01E3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E6AE5994239A87A0007C01E3 /* Main.storyboard */; };
@@ -28,6 +30,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E6A219E0245F9058002E383F /* AddShowButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShowButton.swift; sourceTree = "<group>"; };
+		E6A219E2245FBA87002E383F /* ModelHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelHelper.swift; sourceTree = "<group>"; };
 		E6AE598D239A87A0007C01E3 /* airDates.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = airDates.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6AE5990239A87A0007C01E3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E6AE5992239A87A0007C01E3 /* MyShowsTableVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyShowsTableVC.swift; sourceTree = "<group>"; };
@@ -107,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				E6AE59B7239AA42B007C01E3 /* NetworkModels.swift */,
+				E6A219E2245FBA87002E383F /* ModelHelper.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -116,6 +121,7 @@
 			children = (
 				E6AE59B9239AAC32007C01E3 /* AddShowVCCell.swift */,
 				E6AE59B3239A9882007C01E3 /* MyShowsTableVCCell.swift */,
+				E6A219E0245F9058002E383F /* AddShowButton.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -226,6 +232,7 @@
 				E6AE59C4239EFBFA007C01E3 /* InitialViewController.swift in Sources */,
 				E6AE59B6239AA34D007C01E3 /* NetworkManager.swift in Sources */,
 				E6AE59B2239A912E007C01E3 /* AddShowVC.swift in Sources */,
+				E6A219E1245F9058002E383F /* AddShowButton.swift in Sources */,
 				E6AE59AA239A8D0F007C01E3 /* DataModel.xcdatamodeld in Sources */,
 				E6AE59C8239F168B007C01E3 /* RootViewController.swift in Sources */,
 				E6AE5993239A87A0007C01E3 /* MyShowsTableVC.swift in Sources */,
@@ -237,6 +244,7 @@
 				E6AE59B4239A9882007C01E3 /* MyShowsTableVCCell.swift in Sources */,
 				E6AE59BA239AAC32007C01E3 /* AddShowVCCell.swift in Sources */,
 				E6AE59AC239A8DC4007C01E3 /* CoreDataStack.swift in Sources */,
+				E6A219E3245FBA87002E383F /* ModelHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -383,6 +391,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = F3PX3T7FPS;
 				INFOPLIST_FILE = airDates/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -400,6 +409,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = F3PX3T7FPS;
 				INFOPLIST_FILE = airDates/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

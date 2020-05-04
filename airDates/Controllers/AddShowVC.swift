@@ -27,7 +27,6 @@ class AddShowVC: UIViewController {
         definesPresentationContext = true
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
-        searchController.dimsBackgroundDuringPresentation = false
         searchController.searchBar.delegate = self
         searchController.searchBar.showsSearchResultsButton = true
     }
@@ -37,7 +36,11 @@ class AddShowVC: UIViewController {
         
         navigationController?.navigationBar.tintColor = .lightPink
         
-        view.backgroundColor = .white
+        if #available(iOS 13, *) {
+            view.backgroundColor = .systemBackground
+        } else {
+            view.backgroundColor = .white
+        }
         setupSearchBar()
         tableView.frame = view.safeAreaLayoutGuide.layoutFrame
         tableView.delegate = self
@@ -117,13 +120,10 @@ extension AddShowVC: UITableViewDataSource {
             
             for myShow in myShows {
                 if myShow.id == Int32(show.id) {
-                    cell.isTracked = true
+                    cell.isTrackingShow = true
                 }
             }
-            
-            cell.addButtonActive = true
-            cell.updateTrackButton()
-
+            cell.isActive = true
         }
         
         cell.showId = show.id
