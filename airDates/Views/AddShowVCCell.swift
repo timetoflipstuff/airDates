@@ -101,12 +101,13 @@ class AddShowVCCell: UITableViewCell{
 
             if isTrackingShow {
 
-                CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl, status: airLabel.text ?? nil) {success in
+                CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl, status: airLabel.text ?? nil) { success in
 
                     if success {
                         DispatchQueue.main.async {
                             self.delegate?.didAddShow()
                         }
+                        self.isActive = true
                     } else {
                         self.isTrackingShow = false
                         self.isActive = true

@@ -109,6 +109,9 @@ class ShowExpandedVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationController?.interactivePopGestureRecognizer?.delegate = nil
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+
         if #available(iOS 13, *) {
             view.backgroundColor = .systemBackground
             subScrollView.backgroundColor = .systemBackground

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		E6A219E1245F9058002E383F /* AddShowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6A219E0245F9058002E383F /* AddShowButton.swift */; };
 		E6A219E3245FBA87002E383F /* ModelHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6A219E2245FBA87002E383F /* ModelHelper.swift */; };
+		E6A219E52460300B002E383F /* SwipeNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6A219E42460300B002E383F /* SwipeNavigationController.swift */; };
 		E6AE5991239A87A0007C01E3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE5990239A87A0007C01E3 /* AppDelegate.swift */; };
 		E6AE5993239A87A0007C01E3 /* MyShowsTableVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AE5992239A87A0007C01E3 /* MyShowsTableVC.swift */; };
 		E6AE5996239A87A0007C01E3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E6AE5994239A87A0007C01E3 /* Main.storyboard */; };
@@ -32,6 +33,7 @@
 /* Begin PBXFileReference section */
 		E6A219E0245F9058002E383F /* AddShowButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShowButton.swift; sourceTree = "<group>"; };
 		E6A219E2245FBA87002E383F /* ModelHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelHelper.swift; sourceTree = "<group>"; };
+		E6A219E42460300B002E383F /* SwipeNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeNavigationController.swift; sourceTree = "<group>"; };
 		E6AE598D239A87A0007C01E3 /* airDates.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = airDates.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6AE5990239A87A0007C01E3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E6AE5992239A87A0007C01E3 /* MyShowsTableVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyShowsTableVC.swift; sourceTree = "<group>"; };
@@ -134,6 +136,7 @@
 				E6AE59BB239B2B13007C01E3 /* ShowExpandedVC.swift */,
 				E6AE59C3239EFBFA007C01E3 /* InitialViewController.swift */,
 				E6AE59C7239F168B007C01E3 /* RootViewController.swift */,
+				E6A219E42460300B002E383F /* SwipeNavigationController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -234,6 +237,7 @@
 				E6AE59B2239A912E007C01E3 /* AddShowVC.swift in Sources */,
 				E6A219E1245F9058002E383F /* AddShowButton.swift in Sources */,
 				E6AE59AA239A8D0F007C01E3 /* DataModel.xcdatamodeld in Sources */,
+				E6A219E52460300B002E383F /* SwipeNavigationController.swift in Sources */,
 				E6AE59C8239F168B007C01E3 /* RootViewController.swift in Sources */,
 				E6AE5993239A87A0007C01E3 /* MyShowsTableVC.swift in Sources */,
 				E6AE5991239A87A0007C01E3 /* AppDelegate.swift in Sources */,

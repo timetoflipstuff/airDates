@@ -17,7 +17,7 @@ final class CoreDataManager {
     private let stack = CoreDataStack.shared
 
     func updateShow(id: Int32, desc: String, minutesTilNextEpisode: NSNumber?, nextEpisodeString: String?, status: String?, country: String?, network: String?, completion: @escaping(Bool) -> Void) {
-        
+
         stack.persistentContainer.performBackgroundTask { (context) in
             let fetchRequest = NSFetchRequest<MOShow>(entityName: "Show")
             fetchRequest.predicate = NSPredicate(format: "id = %d", id)
@@ -130,7 +130,6 @@ final class CoreDataManager {
             NetworkManager.shared.getShowData(id: fetchedShow.id) { showData in
 
                 guard let showData = showData else {
-
                     dispatchGroup.leave()
                     return
                 }

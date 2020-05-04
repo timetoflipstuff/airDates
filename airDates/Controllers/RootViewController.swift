@@ -37,7 +37,7 @@ class RootViewController: UIViewController {
     
     
     func switchToMainScreen() {
-        animateFadeTransition(to: UINavigationController(rootViewController: mainViewController))
+        animateFadeTransition(to: SwipeNavigationController(rootViewController: mainViewController))
     }
     
     private func animateFadeTransition(to new: UIViewController, completion: (() -> Void)? = nil) {

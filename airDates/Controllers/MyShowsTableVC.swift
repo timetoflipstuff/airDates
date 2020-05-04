@@ -55,11 +55,20 @@ class MyShowsTableVC: UITableViewController {
     func setupTableView(completion: @escaping (() -> Void) = {}) {
 
         images = []
-        myShows = []
+        tableView.reloadData()
 
         coreData.updateSavedShowData() {
 
-            guard let fetchedShows = self.coreData.getFetchedResultsController().fetchedObjects else { return }
+            guard let fetchedShows = self.coreData.getFetchedResultsController().fetchedObjects else {
+                self.myShows = []
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                    completion()
+                }
+
+                completion()
+                return
+            }
 
             self.myShows = fetchedShows
 
@@ -67,7 +76,10 @@ class MyShowsTableVC: UITableViewController {
                 self.images.append(nil)
             }
 
-            self.tableView.reloadData()
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+
             completion()
         }
     }
