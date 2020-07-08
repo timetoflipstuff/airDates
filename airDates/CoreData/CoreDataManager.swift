@@ -12,11 +12,11 @@ import UIKit
 
 final class CoreDataManager {
 
-    public static let shared = CoreDataManager()
+    static let shared = CoreDataManager()
 
     private let stack = CoreDataStack.shared
 
-    func updateShow(id: Int32, desc: String, minutesTilNextEpisode: NSNumber?, nextEpisodeString: String?, status: String?, country: String?, network: String?, completion: @escaping(Bool) -> Void) {
+    func updateShow(id: Int32, desc: String, nextEpisodeDateSnapshot: Date?, status: String?, country: String?, network: String?, completion: @escaping(Bool) -> Void) {
 
         stack.persistentContainer.performBackgroundTask { (context) in
             let fetchRequest = NSFetchRequest<MOShow>(entityName: "Show")
@@ -28,12 +28,9 @@ final class CoreDataManager {
                 
                 showToUpdate.setValue(desc, forKey: "desc")
                 showToUpdate.setValue(status, forKey: "status")
-                
                 showToUpdate.setValue(country ?? nil, forKey: "country")
                 showToUpdate.setValue(network ?? nil, forKey: "network")
-
-                showToUpdate.setValue(minutesTilNextEpisode ?? 1000000, forKey: "minutesTilNextEpisode")
-                showToUpdate.setValue(nextEpisodeString ?? nil, forKey: "nextEpisodeString")
+                showToUpdate.setValue(nextEpisodeDateSnapshot, forKey: "nextEpisodeDateSnapshot")
                 
                 do {
                     try context.save()
@@ -102,7 +99,7 @@ final class CoreDataManager {
     func getFetchedResultsController() -> NSFetchedResultsController<MOShow> {
         let context = stack.persistentContainer.viewContext
         let fetchRequest = NSFetchRequest<MOShow>(entityName: "Show")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "minutesTilNextEpisode", ascending: true)]
+        fetchRequest.sortDescriptors = [CustomSortDescriptor(key: "nextEpisodeDateSnapshot", ascending: true)]
         let controller = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                     managedObjectContext: context,
                                                     sectionNameKeyPath: nil,
@@ -134,19 +131,26 @@ final class CoreDataManager {
                     return
                 }
 
-                var minutesTilNextEpisode: NSNumber? = 1000000
-                var nextEpisodeString: String? = nil
+                var nextEpisodeDateSnapshot: Date?
                 let status = showData.tvShow.status
                 let desc = showData.tvShow.description
                 let country = showData.tvShow.country
                 let network = showData.tvShow.network
 
-                if let countdown = showData.tvShow.countdown {
-                    nextEpisodeString = ModelHelper.shared.formNextEpisodeString(apiDateString: countdown.air_date)
-                    minutesTilNextEpisode = ModelHelper.shared.getMinutesTilNextEpisode(apiDateString: countdown.air_date)
+                do {
+                    nextEpisodeDateSnapshot = try ModelHelper.getEpisodeDate(from: showData.tvShow.countdown?.air_date)
+                } catch {
+                    print(error.localizedDescription)
                 }
 
-                CoreDataManager.shared.updateShow(id: fetchedShow.id, desc: desc, minutesTilNextEpisode: minutesTilNextEpisode, nextEpisodeString: nextEpisodeString, status: status, country: country, network: network) { _ in
+                CoreDataManager.shared.updateShow(
+                    id: fetchedShow.id,
+                    desc: desc,
+                    nextEpisodeDateSnapshot: nextEpisodeDateSnapshot,
+                    status: status,
+                    country: country,
+                    network: network
+                ) { _ in
                     dispatchGroup.leave()
                 }
             }

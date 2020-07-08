@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  MyShowsVC.swift
 //  airDates
 //
 //  Created by Alex Mikhaylov on 03/12/2019.
@@ -9,12 +9,17 @@
 import UIKit
 import CoreData
 
-class MyShowsTableVC: UITableViewController {
+fileprivate struct ShowCellModel {
+    var show: MOShow
+    var minutesTilNextEpisode: Int? = nil
+    var thumbnailImage: UIImage? = nil
+}
+
+/// The "My Shows" screen.
+final class MyShowsVC: UITableViewController {
     
-    let coreData = CoreDataManager.shared
-    
-    var myShows: [MOShow]!
-    var images: [UIImage?]!
+    private let coreData = CoreDataManager.shared
+    private var myShows: [ShowCellModel] = []
 
     override func viewDidLoad() {
         
@@ -22,8 +27,10 @@ class MyShowsTableVC: UITableViewController {
         
         if #available(iOS 13.0, *) {
             view.backgroundColor = .systemBackground
+            tableView.backgroundColor = .systemBackground
         } else {
             view.backgroundColor = .white
+            tableView.backgroundColor = .white
         }
         tableView.tableFooterView = UIView()
         
@@ -41,7 +48,7 @@ class MyShowsTableVC: UITableViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(handleShowAddition))
         navigationItem.rightBarButtonItem?.tintColor = .lightPink
         
-        tableView.register(MyShowsTableVCCell.self, forCellReuseIdentifier: MyShowsTableVCCell.reuseId)
+        tableView.register(MyShowCell.self, forCellReuseIdentifier: MyShowCell.reuseId)
     }
     
     @objc private func refreshShowTable() {
@@ -54,7 +61,7 @@ class MyShowsTableVC: UITableViewController {
     
     func setupTableView(completion: @escaping (() -> Void) = {}) {
 
-        images = []
+        myShows = []
         tableView.reloadData()
 
         coreData.updateSavedShowData() {
@@ -70,11 +77,7 @@ class MyShowsTableVC: UITableViewController {
                 return
             }
 
-            self.myShows = fetchedShows
-
-            for _ in fetchedShows {
-                self.images.append(nil)
-            }
+            self.myShows = fetchedShows.map { ShowCellModel(show: $0) }
 
             DispatchQueue.main.async {
                 self.tableView.reloadData()
@@ -85,7 +88,7 @@ class MyShowsTableVC: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.myShows?.count ?? 0
+        return myShows.count
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -93,76 +96,51 @@ class MyShowsTableVC: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+        let show = myShows[indexPath.row].show
+        let cell = tableView.dequeueReusableCell(withIdentifier: MyShowCell.reuseId, for: indexPath) as! MyShowCell
         
-        let show = myShows[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: MyShowsTableVCCell.reuseId, for: indexPath) as! MyShowsTableVCCell
-        
-        cell.titleLabel.text = show.title
+        cell.title = show.title
+        cell.nextEpisode = ModelHelper.getNextEpisodeString(from: show.nextEpisodeDateSnapshot) ??
+            show.status == "Running" ? "Unannounced" : show.status
         NetworkManager.shared.downloadImage(link: show.imgUrl) { image in
-            cell.imgView.image = image
-            if self.images.count > indexPath.row {
-                self.images[indexPath.row] = image
+            DispatchQueue.main.async { [weak self, weak cell] in
+                cell?.thumbnailImage = image
+                self?.myShows[indexPath.row].thumbnailImage = image
             }
-            
         }
-        
-        cell.nextEpisodeLabel.text = show.nextEpisodeString ?? "Unannounced"
         
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+
         let showExpandedVC = ShowExpandedVC()
-        let show = myShows[indexPath.row]
+        let showModel = myShows[indexPath.row]
+        let show = showModel.show
 
         showExpandedVC.delegate = self
+        showExpandedVC.imgView.image = showModel.thumbnailImage
         showExpandedVC.titleLabel.text = show.title
         showExpandedVC.showId = Int(show.id)
         showExpandedVC.imgUrl = show.imgUrl
-        
-        if self.images.count > indexPath.row {
-            showExpandedVC.imgView.image = self.images[indexPath.row]
-        }
-        
-        
-        if let network = show.network, let country = show.country, let desc = show.desc {
-            showExpandedVC.networkLabel.text = "\(network), \(country)"
-            
-            let descString = desc.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
-            
-            showExpandedVC.descLabel.text = descString
-        } else {
-            showExpandedVC.networkLabel.text = "Unknown"
-        }
-        
-        showExpandedVC.airLabel.text = show.status
-        
+        showExpandedVC.imgView.image = showModel.thumbnailImage
+
         navigationController?.pushViewController(showExpandedVC, animated: true)
-        
-        showExpandedVC.setupUI() {success in
-            if success {
-                
-                showExpandedVC.hideOverlayView()
-                
-            } else {
-                
-                self.navigationController?.popViewController(animated: true)
-                
-            }
-        }
+
+        showExpandedVC.setupUI(network: show.network, country: show.country, status: show.status)
     }
-    
+
     @objc private func handleShowAddition() {
         let addShowVC = AddShowVC()
         addShowVC.delegate = self
         navigationController?.pushViewController(addShowVC, animated: true)
     }
-    
+
 }
 
-extension MyShowsTableVC: AddShowVCCellDelegate {
+extension MyShowsVC: ShowCellDelegate {
     func didAddShow() {
-        self.setupTableView()
+        setupTableView()
     }
 }

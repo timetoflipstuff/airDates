@@ -13,17 +13,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
+
         let rootViewController = RootViewController()
-        
-        window?.rootViewController = rootViewController
-        
+
+        self.window?.rootViewController = rootViewController
+
         rootViewController.mainViewController.setupTableView {
-            rootViewController.switchToMainScreen()
+            DispatchQueue.main.async {
+                rootViewController.switchToMainScreen()
+            }
         }
-        
+
         return true
     }
 

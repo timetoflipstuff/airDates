@@ -19,7 +19,5 @@ class MOShow: NSManagedObject {
     @NSManaged public var country: String?
     @NSManaged public var network: String?
     @NSManaged public var desc: String?
-    @NSManaged public var minutesTilNextEpisode: NSNumber?
-    @NSManaged public var nextEpisodeString: String?
-    
+    @NSManaged public var nextEpisodeDateSnapshot: Date?
 }

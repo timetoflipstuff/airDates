@@ -8,23 +8,23 @@
 
 import UIKit
 
-class RootViewController: UIViewController {
-    
+final class RootViewController: UIViewController {
+
     private var current: UIViewController
-    
-    public let mainViewController = MyShowsTableVC()
-    
-    public let initialViewController = InitialViewController()
-    
+
+    let mainViewController = MyShowsVC()
+
+    let initialViewController = InitialViewController()
+
     init() {
         self.current = initialViewController
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -34,12 +34,11 @@ class RootViewController: UIViewController {
         current.didMove(toParent: self)
         
     }
-    
-    
+
     func switchToMainScreen() {
         animateFadeTransition(to: SwipeNavigationController(rootViewController: mainViewController))
     }
-    
+
     private func animateFadeTransition(to new: UIViewController, completion: (() -> Void)? = nil) {
         current.willMove(toParent: nil)
         addChild(new)

@@ -8,11 +8,11 @@
 
 import UIKit
 
-class ShowExpandedVC: UIViewController {
+final class ShowExpandedVC: UIViewController {
 
     let fetchedResultsController = CoreDataManager.shared.getFetchedResultsController()
 
-    weak var delegate: AddShowVCCellDelegate?
+    weak var delegate: ShowCellDelegate?
 
     var showId: Int?
     var showTitle: String?
@@ -103,7 +103,11 @@ class ShowExpandedVC: UIViewController {
     var nextEpisodeNumber = UILabel()
     var nextEpisodeDate = UILabel()
 
-    private var overlayView = UIView()
+    private var overlayView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        return view
+    }()
     private var overlayRect = UIView()
 
     override func viewDidLoad() {
@@ -194,8 +198,25 @@ class ShowExpandedVC: UIViewController {
         }
 
     }
+
+    func setupUI(network: String?, country: String?, status: String?) {
+
+        if let network = network, let country = country {
+            networkLabel.text = "\(network), \(country)"
+        }
+
+        airLabel.text = status ?? "Unknown"
+
+        setupUI() { success in
+            if success {
+                self.hideOverlayView()
+            } else {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
     
-    func setupUI(completion: @escaping(Bool) -> Void) {
+    private func setupUI(completion: @escaping(Bool) -> Void) {
 
         guard let imgUrl = imgUrl, let showId = showId, let myShows = fetchedResultsController.fetchedObjects else {return}
 

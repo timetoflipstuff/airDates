@@ -9,7 +9,7 @@
 import UIKit
 
 /// "Track" button.
-class AddShowButton: UIButton {
+final class AddShowButton: UIButton {
 
     /// Current state of the button.
     /// Determined by the combination of isActive and isTrackingShow.
@@ -86,7 +86,7 @@ class AddShowButton: UIButton {
 
     private func updateAppearance() {
 
-        switch self.buttonState {
+        switch buttonState {
         case .tracking:
             backgroundColor = .gray
             setTitleColor(.white, for: UIControl.State.normal)
@@ -98,7 +98,6 @@ class AddShowButton: UIButton {
         case .inactive:
             self.backgroundColor = .gray
             self.setTitleColor(.white, for: UIControl.State.normal)
-            self.setTitle("Unavailable", for: UIControl.State.normal)
         }
     }
 }

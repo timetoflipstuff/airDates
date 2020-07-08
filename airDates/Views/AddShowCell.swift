@@ -1,5 +1,5 @@
 //
-//  AddShowVCCell.swift
+//  AddShowCell.swift
 //  airDates
 //
 //  Created by Alex Mikhaylov on 01/12/2019.
@@ -8,15 +8,11 @@
 
 import UIKit
 
-protocol AddShowVCCellDelegate: AnyObject {
-    func didAddShow()
-}
+final class AddShowCell: UITableViewCell{
 
-class AddShowVCCell: UITableViewCell{
+    static let reuseId = "AddShowCell"
 
-    public static let reuseId = "AddShowCell"
-
-    weak var delegate: AddShowVCCellDelegate?
+    weak var delegate: ShowCellDelegate?
 
     var showId: Int?
     var title: String?
