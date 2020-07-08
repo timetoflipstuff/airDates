@@ -24,7 +24,7 @@ final class MyShowsVC: UITableViewController {
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        
+
         if #available(iOS 13.0, *) {
             view.backgroundColor = .systemBackground
             tableView.backgroundColor = .systemBackground
@@ -33,32 +33,30 @@ final class MyShowsVC: UITableViewController {
             tableView.backgroundColor = .white
         }
         tableView.tableFooterView = UIView()
-        
+
         let refreshControl = UIRefreshControl()
-        
+
         if #available(iOS 10.0, *) {
             tableView.refreshControl = refreshControl
         } else {
             tableView.addSubview(refreshControl)
         }
-        
+
         refreshControl.addTarget(self, action: #selector(refreshShowTable), for: .valueChanged)
 
         navigationItem.title = "My Shows"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(handleShowAddition))
         navigationItem.rightBarButtonItem?.tintColor = .lightPink
-        
+
         tableView.register(MyShowCell.self, forCellReuseIdentifier: MyShowCell.reuseId)
     }
-    
+
     @objc private func refreshShowTable() {
-        
         setupTableView() {
             self.refreshControl?.endRefreshing()
         }
-        
     }
-    
+
     func setupTableView(completion: @escaping (() -> Void) = {}) {
 
         myShows = []
@@ -99,7 +97,7 @@ final class MyShowsVC: UITableViewController {
 
         let show = myShows[indexPath.row].show
         let cell = tableView.dequeueReusableCell(withIdentifier: MyShowCell.reuseId, for: indexPath) as! MyShowCell
-        
+
         cell.title = show.title
         cell.nextEpisode = ModelHelper.getNextEpisodeString(from: show.nextEpisodeDateSnapshot) ??
             show.status == "Running" ? "Unannounced" : show.status
@@ -109,10 +107,10 @@ final class MyShowsVC: UITableViewController {
                 self?.myShows[indexPath.row].thumbnailImage = image
             }
         }
-        
+
         return cell
     }
-    
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
         let showExpandedVC = ShowExpandedVC()
@@ -136,7 +134,6 @@ final class MyShowsVC: UITableViewController {
         addShowVC.delegate = self
         navigationController?.pushViewController(addShowVC, animated: true)
     }
-
 }
 
 extension MyShowsVC: ShowCellDelegate {

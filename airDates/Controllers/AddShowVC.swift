@@ -37,8 +37,10 @@ final class AddShowVC: UIViewController {
 
         if #available(iOS 13, *) {
             view.backgroundColor = .systemBackground
+            tableView.backgroundColor = .systemBackground
         } else {
             view.backgroundColor = .white
+            tableView.backgroundColor = .white
         }
         setupSearchBar()
         tableView.frame = view.safeAreaLayoutGuide.layoutFrame
