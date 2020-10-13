@@ -21,8 +21,12 @@ final class MyShowsVC: UITableViewController {
     private let coreData = CoreDataManager.shared
     private var myShows: [ShowCellModel] = []
 
+    override func loadView() {
+        super.loadView()
+        navigationItem.largeTitleDisplayMode = .always
+    }
+
     override func viewDidLoad() {
-        
         super.viewDidLoad()
 
         if #available(iOS 13.0, *) {
@@ -48,7 +52,7 @@ final class MyShowsVC: UITableViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(handleShowAddition))
         navigationItem.rightBarButtonItem?.tintColor = .lightPink
 
-        tableView.register(MyShowCell.self, forCellReuseIdentifier: MyShowCell.reuseId)
+        tableView.register(ShowCell.self, forCellReuseIdentifier: ShowCell.reuseId)
     }
 
     @objc private func refreshShowTable() {
@@ -96,14 +100,14 @@ final class MyShowsVC: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let show = myShows[indexPath.row].show
-        let cell = tableView.dequeueReusableCell(withIdentifier: MyShowCell.reuseId, for: indexPath) as! MyShowCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: ShowCell.reuseId, for: indexPath) as! ShowCell
 
         cell.title = show.title
-        cell.nextEpisode = ModelHelper.getNextEpisodeString(from: show.nextEpisodeDateSnapshot) ??
+        cell.subtitle = ModelHelper.getNextEpisodeString(from: show.nextEpisodeDateSnapshot) ??
             show.status == "Running" ? "Unannounced" : show.status
         NetworkManager.shared.downloadImage(link: show.imgUrl) { image in
             DispatchQueue.main.async { [weak self, weak cell] in
-                cell?.thumbnailImage = image
+                cell?.img = image
                 self?.myShows[indexPath.row].thumbnailImage = image
             }
         }
@@ -118,11 +122,10 @@ final class MyShowsVC: UITableViewController {
         let show = showModel.show
 
         showExpandedVC.delegate = self
-        showExpandedVC.imgView.image = showModel.thumbnailImage
-        showExpandedVC.titleLabel.text = show.title
+        showExpandedVC.image = showModel.thumbnailImage
+        showExpandedVC.showTitle = show.title
         showExpandedVC.showId = Int(show.id)
         showExpandedVC.imgUrl = show.imgUrl
-        showExpandedVC.imgView.image = showModel.thumbnailImage
 
         navigationController?.pushViewController(showExpandedVC, animated: true)
 

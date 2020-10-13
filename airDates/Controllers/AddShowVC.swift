@@ -30,6 +30,11 @@ final class AddShowVC: UIViewController {
         searchController.searchBar.showsSearchResultsButton = true
     }
 
+    override func loadView() {
+        super.loadView()
+        navigationItem.largeTitleDisplayMode = .never
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -52,7 +57,7 @@ final class AddShowVC: UIViewController {
 
         myShows = CoreDataManager.shared.getFetchedResultsController().fetchedObjects
 
-        tableView.register(AddShowCell.self, forCellReuseIdentifier: AddShowCell.reuseId)
+        tableView.register(ShowCell.self, forCellReuseIdentifier: ShowCell.reuseId)
     }
 }
 
@@ -62,12 +67,12 @@ extension AddShowVC: UITableViewDelegate {
         let showExpandedVC = ShowExpandedVC()
         let show = shows[indexPath.row]
         showExpandedVC.delegate = self
-        showExpandedVC.titleLabel.text = show.name
+        showExpandedVC.showTitle = show.name
         showExpandedVC.showId = show.id
         showExpandedVC.imgUrl = show.image_thumbnail_path
 
         if self.images.count > indexPath.row {
-            showExpandedVC.imgView.image = self.images[indexPath.row]
+            showExpandedVC.image = self.images[indexPath.row]
         }
 
         navigationController?.pushViewController(showExpandedVC, animated: true)
@@ -89,10 +94,11 @@ extension AddShowVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let show = shows[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: AddShowCell.reuseId, for: indexPath) as! AddShowCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: ShowCell.reuseId, for: indexPath) as! ShowCell
 
         cell.delegate = self
         cell.selectionStyle = .gray
+        cell.isAddShowButtonVisible = true
 
         if let myShows = myShows {
 
@@ -109,15 +115,15 @@ extension AddShowVC: UITableViewDataSource {
         cell.imgUrl = show.image_thumbnail_path
 
         NetworkManager.shared.downloadImage(link: show.image_thumbnail_path) { image in
-            cell.imgView.image = image
+            cell.img = image
 
             if self.images.count > indexPath.row {
                 self.images[indexPath.row] = image
             }
         }
 
-        cell.titleLabel.text = show.name
-        cell.airLabel.text = show.status
+        cell.title = show.name
+        cell.subtitle = show.status
 
         return cell
     }

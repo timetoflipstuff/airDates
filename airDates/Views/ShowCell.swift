@@ -1,22 +1,59 @@
 //
-//  AddShowCell.swift
+//  ShowCell.swift
 //  airDates
 //
-//  Created by Alex Mikhaylov on 01/12/2019.
-//  Copyright © 2019 Alexander Mikhaylov. All rights reserved.
+//  Created by Alex Mikhaylov on 13.10.2020.
+//  Copyright © 2020 Alexander Mikhaylov. All rights reserved.
 //
 
 import UIKit
 
-final class AddShowCell: UITableViewCell{
+protocol ShowCellDelegate: AnyObject {
+    func didAddShow()
+}
 
-    static let reuseId = "AddShowCell"
+final class ShowCell: UITableViewCell{
+
+    private lazy var imgView: UIImageView = {
+        let imgView = UIImageView()
+        imgView.backgroundColor = .gray
+        imgView.contentMode = .scaleAspectFill
+        imgView.clipsToBounds = true
+        imgView.layer.cornerRadius = 4
+        return imgView
+    }()
+
+    private lazy var titleLabel: UILabel = {
+        let titleLabel = UILabel()
+        titleLabel.numberOfLines = 2
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 17)
+        return titleLabel
+    }()
+
+    private lazy var statusLabel = UILabel()
+
+    private lazy var addShowButton = AddShowButton()
+
+    // MARK: - Public Interface
+
+    var isAddShowButtonVisible = false {
+        didSet {
+            addShowButton.isHidden = !isAddShowButtonVisible
+        }
+    }
+
+    static let reuseId = "ShowCell"
 
     weak var delegate: ShowCellDelegate?
 
     var showId: Int?
-    var title: String?
     var imgUrl: String?
+
+    var title: String? { didSet { titleLabel.text = title } }
+
+    var subtitle: String? { didSet { statusLabel.text = subtitle } }
+
+    var img: UIImage? { didSet { imgView.image = img } }
 
     var isActive = false {
         didSet {
@@ -33,35 +70,7 @@ final class AddShowCell: UITableViewCell{
         }
     }
 
-    let imgView: UIImageView = {
-        let imgView = UIImageView()
-        imgView.backgroundColor = .gray
-        imgView.contentMode = .scaleAspectFill
-        imgView.clipsToBounds = true
-        imgView.layer.cornerRadius = 4
-        imgView.translatesAutoresizingMaskIntoConstraints = false
-        return imgView
-    }()
-
-    let titleLabel: UILabel = {
-        let titleLabel = UILabel()
-        titleLabel.numberOfLines = 2
-        titleLabel.font = titleLabel.font.withSize(24)
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        return titleLabel
-    }()
-
-    let airLabel: UILabel = {
-        let airLabel = UILabel()
-        airLabel.translatesAutoresizingMaskIntoConstraints = false
-        return airLabel
-    }()
-
-    let addShowButton: AddShowButton = {
-        let addShowButton = AddShowButton()
-        addShowButton.translatesAutoresizingMaskIntoConstraints = false
-        return addShowButton
-    }()
+    // MARK: - Init
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
 
@@ -72,19 +81,25 @@ final class AddShowCell: UITableViewCell{
         if #available(iOS 13.0, *) {
             contentView.backgroundColor = .systemBackground
             titleLabel.textColor = .label
-            airLabel.textColor = .secondaryLabel
+            statusLabel.textColor = .secondaryLabel
         } else {
             contentView.backgroundColor = .white
             titleLabel.textColor = .black
-            airLabel.textColor = .darkGray
+            statusLabel.textColor = .darkGray
         }
 
-        contentView.addSubview(imgView)
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(airLabel)
-        contentView.addSubview(addShowButton)
+        addShowButton.isHidden = !isAddShowButtonVisible
+
+        [imgView, titleLabel, statusLabel, addShowButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            contentView.addSubview($0)
+        }
 
         setupConstraints()
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     @objc private func addShowButtonTapped() {
@@ -97,7 +112,7 @@ final class AddShowCell: UITableViewCell{
 
             if isTrackingShow {
 
-                CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl, status: airLabel.text ?? nil) { success in
+                CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl, status: statusLabel.text ?? nil) { success in
 
                     if success {
                         DispatchQueue.main.async {
@@ -112,7 +127,7 @@ final class AddShowCell: UITableViewCell{
 
             } else {
 
-                CoreDataManager.shared.deleteShow(id: Int32(id)) {success in
+                CoreDataManager.shared.deleteShow(id: Int32(id)) { success in
 
                     if success {
                         DispatchQueue.main.async {
@@ -130,21 +145,19 @@ final class AddShowCell: UITableViewCell{
             }
         }
     }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
 
     // MARK: - Layout
-    
+
     override func prepareForReuse() {
         super.prepareForReuse()
 
-        imgView.image = nil
-        titleLabel.text = ""
-        airLabel.text = ""
         isActive = false
         isTrackingShow = false
+        isAddShowButtonVisible = false
+
+        title = nil
+        subtitle = nil
+        img = nil
     }
 
     private func setupConstraints() {
@@ -159,9 +172,9 @@ final class AddShowCell: UITableViewCell{
             titleLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
 
-            airLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
-            airLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16),
-            airLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            statusLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
+            statusLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16),
+            statusLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
 
             addShowButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
             addShowButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),

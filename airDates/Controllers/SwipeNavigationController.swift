@@ -14,17 +14,20 @@ final class SwipeNavigationController: UINavigationController {
 
     override init(rootViewController: UIViewController) {
         super.init(rootViewController: rootViewController)
+        navigationBar.prefersLargeTitles = true
     }
 
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
 
+        navigationBar.prefersLargeTitles = true
         delegate = self
     }
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
+        navigationBar.prefersLargeTitles = true
         delegate = self
     }
 

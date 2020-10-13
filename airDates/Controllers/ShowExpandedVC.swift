@@ -10,13 +10,100 @@ import UIKit
 
 final class ShowExpandedVC: UIViewController {
 
-    let fetchedResultsController = CoreDataManager.shared.getFetchedResultsController()
+    private let fetchedResultsController = CoreDataManager.shared.getFetchedResultsController()
+
+    private lazy var scrollView = UIScrollView()
+
+    private lazy var subScrollView: UIView = {
+        let view = UIView()
+        if #available(iOS 13, *) {
+            view.backgroundColor = .systemBackground
+        } else {
+            view.backgroundColor = .white
+        }
+        return view
+    }()
+
+    private lazy var colorView = UIView()
+
+    private lazy var titleLabel: UILabel = {
+        var titleLabel = UILabel()
+        titleLabel.numberOfLines = 0
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 34)
+        titleLabel.textColor = .white
+        return titleLabel
+    }()
+
+    private lazy var imgView: UIImageView = {
+        var imgView = UIImageView()
+        imgView.contentMode = .scaleAspectFit
+        imgView.layer.shadowColor = UIColor.black.cgColor
+        imgView.layer.shadowOpacity = 0.5
+        imgView.layer.shadowOffset = .zero
+        imgView.layer.shadowRadius = 16
+        imgView.layer.cornerRadius = 4
+        return imgView
+    }()
+
+    private lazy var imgViewView = UIView()
+
+    private lazy var addShowButton = AddShowButton()
+
+    private lazy var descTitleLabel = titleLabel(text: "Show description")
+    private lazy var descLabel = label()
+
+    private lazy var nextEpisodeTitleLabel = titleLabel(text: "Upcoming episode")
+    private lazy var nextEpisodeLabel = label(text: "Not announced", isSecondary: false)
+    private lazy var nextEpisodeNumberLabel = label()
+    private lazy var nextEpisodeDateLabel = label()
+
+    private var overlayView: UIView = {
+        let view = UIView()
+        if #available(iOS 13, *) {
+            view.backgroundColor = .systemBackground
+        } else {
+            view.backgroundColor = .white
+        }
+        return view
+    }()
+
+    private func titleLabel(text: String?) -> UILabel {
+        let label = UILabel()
+        label.font = UIFont.boldSystemFont(ofSize: 17)
+        label.text = text
+        if #available(iOS 13, *) {
+            label.textColor = .label
+        } else {
+            label.textColor = .black
+        }
+        return label
+    }
+
+    private func label(text: String? = nil, isSecondary: Bool = true) -> UILabel {
+        let label = UILabel()
+        label.font = label.font.withSize(15)
+        label.numberOfLines = 0
+        label.text = text
+        if #available(iOS 13, *) {
+            label.textColor = isSecondary ? .secondaryLabel : .label
+        } else {
+            label.textColor = isSecondary ? .darkGray : .black
+        }
+        return label
+    }
+
+    // MARK: - Color
+
+    private func setColor(_ color: UIColor?) {
+        let color = color ?? .darkGray
+        overlayView.backgroundColor = color
+        colorView.backgroundColor = color
+        view.backgroundColor = color
+    }
+
+    // MARK: - Public Interface
 
     weak var delegate: ShowCellDelegate?
-
-    var showId: Int?
-    var showTitle: String?
-    var imgUrl: String?
 
     var isActive = false {
         didSet {
@@ -33,82 +120,65 @@ final class ShowExpandedVC: UIViewController {
         }
     }
 
-    var episodes: [Episode] = []
 
-    var scrollView = UIScrollView()
-    var subScrollView = UIView()
-    var colorScrollView = UIView()
-    var colorView = UIView()
+    var showId: Int?
+    var showTitle: String? {
+        didSet {
+            titleLabel.text = showTitle
+        }
+    }
+    var imgUrl: String?
 
-    var titleLabel: UILabel = {
-        var titleLabel = UILabel()
-        titleLabel.numberOfLines = 4
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 45)
-        return titleLabel
-    }()
+    let infoView = InfoView()
 
-    var imgView: UIImageView = {
-        var imgView = UIImageView()
-        imgView.contentMode = .scaleAspectFit
-        imgView.layer.shadowColor = UIColor.black.cgColor
-        imgView.layer.shadowOpacity = 0.5
-        imgView.layer.shadowOffset = .zero
-        imgView.layer.shadowRadius = 16
-        imgView.layer.cornerRadius = 4
-        return imgView
-    }()
+    var image: UIImage? {
+        didSet {
+            imgView.image = image
+        }
+    }
 
-    var imgViewView = UIView()
+    var showDescription: String? {
+        get {
+            return descLabel.text
+        }
+        set {
+            descLabel.text = newValue
+        }
+    }
 
-    var genreLabel: UILabel = {
-        var genreLabel = UILabel()
-        genreLabel.textColor = .white
-        genreLabel.numberOfLines = 3
-        return genreLabel
-    }()
+    var nextEpisodeTitle: String? {
+        get {
+            return nextEpisodeLabel.text
+        }
+        set {
+            nextEpisodeLabel.text = newValue
+        }
+    }
 
-    var networkLabel = UILabel()
-    var airLabel = UILabel()
+    var nextEpisodeNumber: String? {
+        get {
+            return nextEpisodeNumberLabel.text
+        }
+        set {
+            nextEpisodeNumberLabel.text = newValue
+        }
+    }
 
-    var addShowButton = AddShowButton()
+    var nextEpisodeDate: String? {
+        get {
+            return nextEpisodeDateLabel.text
+        }
+        set {
+            nextEpisodeDateLabel.text = newValue
+        }
+    }
 
-    var descHeader: UILabel = {
-        var descHeader = UILabel()
-        descHeader.text = "Show description"
-        descHeader.font = descHeader.font.withSize(35)
-        return descHeader
-    }()
+    // MARK: - Lifecycle
 
-    var descLabel: UILabel = {
-        var descLabel = UILabel()
-        descLabel.numberOfLines = 0
-        descLabel.text = ""
-        return descLabel
-    }()
-
-    var nextEpisodeHeader: UILabel = {
-        var nextEpisodeHeader = UILabel()
-        nextEpisodeHeader.font = nextEpisodeHeader.font.withSize(35)
-        nextEpisodeHeader.text = "Upcoming episode"
-        return nextEpisodeHeader
-    }()
-
-    var nextEpisodeTitle: UILabel = {
-        var nextEpisodeTitle = UILabel()
-        nextEpisodeTitle.text = "Not announced"
-        nextEpisodeTitle.font = nextEpisodeTitle.font.withSize(21)
-        return nextEpisodeTitle
-    }()
-
-    var nextEpisodeNumber = UILabel()
-    var nextEpisodeDate = UILabel()
-
-    private var overlayView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
-        return view
-    }()
-    private var overlayRect = UIView()
+    override func loadView() {
+        super.loadView()
+        navigationItem.largeTitleDisplayMode = .never
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -116,73 +186,31 @@ final class ShowExpandedVC: UIViewController {
         navigationController?.interactivePopGestureRecognizer?.delegate = nil
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
 
-        if #available(iOS 13, *) {
-            view.backgroundColor = .systemBackground
-            subScrollView.backgroundColor = .systemBackground
-            airLabel.textColor = .white
-            titleLabel.textColor = .white
-            descLabel.textColor = .secondaryLabel
-            nextEpisodeNumber.textColor = .secondaryLabel
-            nextEpisodeDate.textColor = .secondaryLabel
-        } else {
-            view.backgroundColor = .white
-            subScrollView.backgroundColor = .white
-            airLabel.textColor = .white
-            titleLabel.textColor = .white
-            descLabel.textColor = .darkGray
-            nextEpisodeNumber.textColor = .darkGray
-            nextEpisodeDate.textColor = .darkGray
-        }
-
         navigationController?.navigationBar.tintColor = .lightPink
-
-        networkLabel.textColor = .white
 
         addShowButton.addTarget(self, action: #selector(addShowButtonTapped), for: .touchUpInside)
 
-        overlayView.translatesAutoresizingMaskIntoConstraints = false
-
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        subScrollView.translatesAutoresizingMaskIntoConstraints = false
-        colorView.translatesAutoresizingMaskIntoConstraints = false
-
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        imgView.translatesAutoresizingMaskIntoConstraints = false
-        networkLabel.translatesAutoresizingMaskIntoConstraints = false
-        genreLabel.translatesAutoresizingMaskIntoConstraints = false
-        airLabel.translatesAutoresizingMaskIntoConstraints = false
-        addShowButton.translatesAutoresizingMaskIntoConstraints = false
-
-        nextEpisodeHeader.translatesAutoresizingMaskIntoConstraints = false
-        nextEpisodeNumber.translatesAutoresizingMaskIntoConstraints = false
-        nextEpisodeTitle.translatesAutoresizingMaskIntoConstraints = false
-        nextEpisodeDate.translatesAutoresizingMaskIntoConstraints = false
-
-        descHeader.translatesAutoresizingMaskIntoConstraints = false
-        descLabel.translatesAutoresizingMaskIntoConstraints = false
+        [overlayView, scrollView, subScrollView, colorView, titleLabel, imgView, infoView, addShowButton, nextEpisodeTitleLabel, nextEpisodeNumberLabel, nextEpisodeLabel, nextEpisodeDateLabel, descTitleLabel, descLabel].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
 
         view.addSubview(scrollView)
         scrollView.addSubview(subScrollView)
-        subScrollView.addSubview(colorView)
-        subScrollView.addSubview(titleLabel)
-        colorView.addSubview(imgView)
-        colorView.addSubview(networkLabel)
-        colorView.addSubview(genreLabel)
-        colorView.addSubview(airLabel)
-        colorView.addSubview(addShowButton)
-        subScrollView.addSubview(nextEpisodeHeader)
-        subScrollView.addSubview(nextEpisodeTitle)
-        subScrollView.addSubview(nextEpisodeNumber)
-        subScrollView.addSubview(nextEpisodeDate)
-        subScrollView.addSubview(descHeader)
-        subScrollView.addSubview(descLabel)
+
+        [colorView, titleLabel].forEach { subScrollView.addSubview($0) }
+
+        [imgView, infoView, addShowButton].forEach { colorView.addSubview($0) }
+
+        [nextEpisodeTitleLabel, nextEpisodeLabel, nextEpisodeNumberLabel, nextEpisodeDateLabel, descTitleLabel, descLabel].forEach {
+            subScrollView.addSubview($0)
+        }
 
         view.addSubview(overlayView)
 
         setupConstraints()
     }
-    
-    func hideOverlayView() {
+
+    override var preferredStatusBarStyle: UIStatusBarStyle { .lightContent }
+
+    private func hideOverlayView() {
 
         let shrinkAnimation = CABasicAnimation(keyPath: "opacity")
         shrinkAnimation.duration = 0.3
@@ -196,16 +224,15 @@ final class ShowExpandedVC: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             self.overlayView.removeFromSuperview()
         }
-
     }
 
     func setupUI(network: String?, country: String?, status: String?) {
 
         if let network = network, let country = country {
-            networkLabel.text = "\(network), \(country)"
+            infoView.networkText = "\(network), \(country)"
         }
 
-        airLabel.text = status ?? "Unknown"
+        infoView.statusText = status ?? "Unknown"
 
         setupUI() { success in
             if success {
@@ -236,21 +263,15 @@ final class ShowExpandedVC: UIViewController {
                 aspectRatio = 1.5
             }
 
-            self.imgView.widthAnchor.constraint(equalTo: self.imgView.heightAnchor, multiplier: aspectRatio).isActive = true
+            imgView.widthAnchor.constraint(equalTo: self.imgView.heightAnchor, multiplier: aspectRatio).isActive = true
 
-            if let color = image.averageColor {
-                self.overlayView.backgroundColor = color
-                self.colorView.backgroundColor = color
-                self.view.backgroundColor = color
-                self.nextEpisodeHeader.textColor = color
-                self.descHeader.textColor = color
-            }
+            setColor(image.averageColor)
 
         } else {
 
             dispatchGroup.enter()
 
-            NetworkManager.shared.downloadImage(link: imgUrl) {image in
+            NetworkManager.shared.downloadImage(link: imgUrl) { image in
                 self.imgView.image = image
                 var aspectRatio = image.size.width/image.size.height
                 if aspectRatio > 1.5 {
@@ -261,14 +282,7 @@ final class ShowExpandedVC: UIViewController {
 
                     self.imgView.widthAnchor.constraint(equalTo: self.imgView.heightAnchor, multiplier: aspectRatio).isActive = true
 
-                    if let color = image.averageColor {
-
-                        self.colorView.backgroundColor = color
-                        self.view.backgroundColor = color
-                        self.nextEpisodeHeader.textColor = color
-                        self.descHeader.textColor = color
-
-                    }
+                    self.setColor(image.averageColor)
 
                     dispatchGroup.leave()
                 }
@@ -277,7 +291,7 @@ final class ShowExpandedVC: UIViewController {
 
         dispatchGroup.enter()
 
-        NetworkManager.shared.getShowData(id: Int32(showId)) {showData in
+        NetworkManager.shared.getShowData(id: Int32(showId)) { showData in
             guard let showData = showData else {
 
                 completion(false)
@@ -294,13 +308,13 @@ final class ShowExpandedVC: UIViewController {
                 }
             }
             DispatchQueue.main.async {
-                self.genreLabel.text = genreString
+                self.infoView.genreText = genreString
                 let descString = showData.tvShow.description.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
                 self.descLabel.text = descString
 
                 if let nextEpisode = showData.tvShow.countdown {
-                    self.nextEpisodeNumber.text = "Season \(nextEpisode.season), Episode \(nextEpisode.episode)"
-                    self.nextEpisodeTitle.text = nextEpisode.name
+                    self.nextEpisodeNumberLabel.text = "Season \(nextEpisode.season), Episode \(nextEpisode.episode)"
+                    self.nextEpisodeLabel.text = nextEpisode.name
 
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateFormat = "yyyy'-'MM'-'dd' 'HH':'mm':'ss"
@@ -312,7 +326,7 @@ final class ShowExpandedVC: UIViewController {
                         dateFormatter.timeZone = TimeZone.current
                         dateFormatter.dateStyle = .medium
                         dateFormatter.timeStyle = .short
-                        self.nextEpisodeDate.text = "Airs on \(dateFormatter.string(from: date))"
+                        self.nextEpisodeDateLabel.text = "Airs on \(dateFormatter.string(from: date))"
                     }
                 }
 
@@ -337,7 +351,7 @@ final class ShowExpandedVC: UIViewController {
 
             if isTrackingShow {
 
-                CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl, status: airLabel.text ?? nil) {success in
+                CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl, status: infoView.statusText ?? nil) {success in
 
                     if success {
                         DispatchQueue.main.async {
@@ -401,43 +415,35 @@ final class ShowExpandedVC: UIViewController {
             imgView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -170),
             imgView.heightAnchor.constraint(greaterThanOrEqualToConstant: 200),
             
-            genreLabel.topAnchor.constraint(equalTo: imgView.topAnchor),
-            genreLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16),
-            genreLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            
-            networkLabel.topAnchor.constraint(equalTo: genreLabel.bottomAnchor, constant: 4),
-            networkLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16),
-            networkLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            
-            airLabel.topAnchor.constraint(equalTo: networkLabel.bottomAnchor, constant: 4),
-            airLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16),
-            airLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            infoView.topAnchor.constraint(equalTo: imgView.topAnchor),
+            infoView.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16),
+            infoView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 
-            addShowButton.topAnchor.constraint(equalTo: airLabel.bottomAnchor, constant: 12),
+            addShowButton.topAnchor.constraint(equalTo: infoView.bottomAnchor, constant: 12),
             addShowButton.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16),
             addShowButton.widthAnchor.constraint(equalToConstant: 100),
             
-            nextEpisodeHeader.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            nextEpisodeHeader.topAnchor.constraint(equalTo: imgView.bottomAnchor, constant: 16),
-            nextEpisodeHeader.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            nextEpisodeTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            nextEpisodeTitleLabel.topAnchor.constraint(equalTo: imgView.bottomAnchor, constant: 16),
+            nextEpisodeTitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
-            nextEpisodeNumber.topAnchor.constraint(equalTo: nextEpisodeTitle.bottomAnchor),
-            nextEpisodeNumber.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            nextEpisodeNumber.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            nextEpisodeNumberLabel.topAnchor.constraint(equalTo: nextEpisodeLabel.bottomAnchor),
+            nextEpisodeNumberLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            nextEpisodeNumberLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
-            nextEpisodeTitle.topAnchor.constraint(equalTo: nextEpisodeHeader.bottomAnchor, constant: 8),
-            nextEpisodeTitle.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            nextEpisodeTitle.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            nextEpisodeLabel.topAnchor.constraint(equalTo: nextEpisodeTitleLabel.bottomAnchor, constant: 8),
+            nextEpisodeLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            nextEpisodeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
-            nextEpisodeDate.topAnchor.constraint(equalTo: nextEpisodeNumber.bottomAnchor),
-            nextEpisodeDate.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            nextEpisodeDate.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            nextEpisodeDateLabel.topAnchor.constraint(equalTo: nextEpisodeNumberLabel.bottomAnchor),
+            nextEpisodeDateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            nextEpisodeDateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
-            descHeader.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            descHeader.topAnchor.constraint(equalTo: nextEpisodeDate.bottomAnchor, constant: 16),
-            descHeader.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            descTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            descTitleLabel.topAnchor.constraint(equalTo: nextEpisodeDateLabel.bottomAnchor, constant: 16),
+            descTitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 
-            descLabel.topAnchor.constraint(equalTo: descHeader.bottomAnchor, constant: 8),
+            descLabel.topAnchor.constraint(equalTo: descTitleLabel.bottomAnchor, constant: 8),
             descLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             descLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
