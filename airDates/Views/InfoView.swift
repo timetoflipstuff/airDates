@@ -19,7 +19,7 @@ final class InfoView: UIStackView {
     private func createLabel() -> UILabel {
         let label = UILabel()
         label.textColor = .white
-        label.font = label.font.withSize(13)
+        label.font = label.font.withSize(15)
         label.numberOfLines = 0
         label.textAlignment = .left
         label.lineBreakMode = .byWordWrapping

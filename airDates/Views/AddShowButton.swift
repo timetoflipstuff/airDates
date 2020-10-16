@@ -27,15 +27,18 @@ final class AddShowButton: UIButton {
         }
     }
 
+    /// Determines whether the color of `untracking` state is black or white.
+    var isInCell = false
+
     /// Indicates whether the button is set to states other than .inactive.
-    var isActive: Bool {
+    var isActive: Bool = false {
         didSet {
             updateAppearance()
         }
     }
 
     /// Indicates whether the button will display "Track" or "Untrack" when isActive = true
-    var isTrackingShow: Bool {
+    var isTrackingShow: Bool = false {
         didSet {
             updateAppearance()
         }
@@ -44,15 +47,12 @@ final class AddShowButton: UIButton {
     /// Initializes button with provided state.
     /// - Parameter buttonState: Whether button will display "Track", "Untrack" or "Unavailable"
     init(with buttonState: AddShowButtonState) {
-
-        self.isActive = false
-        self.isTrackingShow = false
-
         super.init(frame: .zero)
 
-        self.layer.cornerRadius = 4
-
+        titleLabel?.font = UIFont.systemFont(ofSize: 16)
         self.buttonState = buttonState
+
+        layer.borderWidth = 1
     }
 
     /// Initializes the Button with given parameters.
@@ -65,6 +65,11 @@ final class AddShowButton: UIButton {
         self.isTrackingShow = isTrackingShow
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layer.cornerRadius = 4
+    }
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -72,6 +77,7 @@ final class AddShowButton: UIButton {
     // MARK: - Private
 
     private func updateProperties(for state: AddShowButtonState) {
+
         switch state {
         case .tracking:
             isActive = true
@@ -86,18 +92,32 @@ final class AddShowButton: UIButton {
 
     private func updateAppearance() {
 
+        let trackingColor: UIColor
+        if isInCell {
+            if #available(iOS 13, *) {
+                trackingColor = .label
+            } else {
+                trackingColor = .black
+            }
+        } else {
+            trackingColor = .white
+        }
+
         switch buttonState {
         case .tracking:
-            backgroundColor = .gray
-            setTitleColor(.white, for: UIControl.State.normal)
+            backgroundColor = .clear
+            layer.borderColor = trackingColor.cgColor
+            setTitleColor(trackingColor, for: UIControl.State.normal)
             setTitle("Untrack", for: UIControl.State.normal)
         case .notTracking:
             backgroundColor = .lightPink
+            layer.borderColor = UIColor.lightPink.cgColor
             setTitleColor(.white, for: UIControl.State.normal)
             setTitle("Track", for: UIControl.State.normal)
         case .inactive:
-            self.backgroundColor = .gray
-            self.setTitleColor(.white, for: UIControl.State.normal)
+            backgroundColor = .clear
+            layer.borderColor = UIColor.gray.cgColor
+            setTitleColor(.gray, for: UIControl.State.normal)
         }
     }
 }

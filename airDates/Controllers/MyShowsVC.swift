@@ -105,6 +105,8 @@ final class MyShowsVC: UITableViewController {
         cell.title = show.title
         cell.subtitle = ModelHelper.getNextEpisodeString(from: show.nextEpisodeDateSnapshot) ??
             show.status == "Running" ? "Unannounced" : show.status
+        cell.isAddShowButtonHidden = true
+
         NetworkManager.shared.downloadImage(link: show.imgUrl) { image in
             DispatchQueue.main.async { [weak self, weak cell] in
                 cell?.img = image

@@ -34,7 +34,6 @@ final class SwipeNavigationController: UINavigationController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // This needs to be in here, not in init
         interactivePopGestureRecognizer?.delegate = self
     }
 
@@ -74,13 +73,8 @@ extension SwipeNavigationController: UINavigationControllerDelegate {
 extension SwipeNavigationController: UIGestureRecognizerDelegate {
 
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard gestureRecognizer == interactivePopGestureRecognizer else {
-            return true // default value
-        }
+        guard gestureRecognizer == interactivePopGestureRecognizer else { return true }
 
-        // Disable pop gesture in two situations:
-        // 1) when the pop animation is in progress
-        // 2) when user swipes quickly a couple of times and animations don't have time to be performed
         return viewControllers.count > 1 && duringPushAnimation == false
     }
 }

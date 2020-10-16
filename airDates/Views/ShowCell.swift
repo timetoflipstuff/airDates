@@ -26,19 +26,24 @@ final class ShowCell: UITableViewCell{
     private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.numberOfLines = 2
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 17)
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 18)
         return titleLabel
     }()
 
     private lazy var statusLabel = UILabel()
 
-    private lazy var addShowButton = AddShowButton()
+    private lazy var addShowButton: AddShowButton = {
+        let button = AddShowButton()
+        button.isInCell = true
+        button.isHidden = isAddShowButtonHidden
+        return button
+    }()
 
     // MARK: - Public Interface
 
-    var isAddShowButtonVisible = false {
+    var isAddShowButtonHidden = false {
         didSet {
-            addShowButton.isHidden = !isAddShowButtonVisible
+            addShowButton.isHidden = isAddShowButtonHidden
         }
     }
 
@@ -87,8 +92,6 @@ final class ShowCell: UITableViewCell{
             titleLabel.textColor = .black
             statusLabel.textColor = .darkGray
         }
-
-        addShowButton.isHidden = !isAddShowButtonVisible
 
         [imgView, titleLabel, statusLabel, addShowButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -153,7 +156,7 @@ final class ShowCell: UITableViewCell{
 
         isActive = false
         isTrackingShow = false
-        isAddShowButtonVisible = false
+        isAddShowButtonHidden = false
 
         title = nil
         subtitle = nil
@@ -176,8 +179,8 @@ final class ShowCell: UITableViewCell{
             statusLabel.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16),
             statusLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
 
-            addShowButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
-            addShowButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            addShowButton.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 8),
+            addShowButton.leadingAnchor.constraint(equalTo: imgView.trailingAnchor, constant: 16),
             addShowButton.widthAnchor.constraint(equalToConstant: 100)
         ])
     }

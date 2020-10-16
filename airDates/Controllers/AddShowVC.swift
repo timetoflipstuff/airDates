@@ -27,7 +27,6 @@ final class AddShowVC: UIViewController {
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
         searchController.searchBar.delegate = self
-        searchController.searchBar.showsSearchResultsButton = true
     }
 
     override func loadView() {
@@ -98,7 +97,6 @@ extension AddShowVC: UITableViewDataSource {
 
         cell.delegate = self
         cell.selectionStyle = .gray
-        cell.isAddShowButtonVisible = true
 
         if let myShows = myShows {
 

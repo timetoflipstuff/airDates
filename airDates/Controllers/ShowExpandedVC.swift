@@ -38,7 +38,7 @@ final class ShowExpandedVC: UIViewController {
         var imgView = UIImageView()
         imgView.contentMode = .scaleAspectFit
         imgView.layer.shadowColor = UIColor.black.cgColor
-        imgView.layer.shadowOpacity = 0.5
+        imgView.layer.shadowOpacity = 0.3
         imgView.layer.shadowOffset = .zero
         imgView.layer.shadowRadius = 16
         imgView.layer.cornerRadius = 4
@@ -69,7 +69,7 @@ final class ShowExpandedVC: UIViewController {
 
     private func titleLabel(text: String?) -> UILabel {
         let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 17)
+        label.font = UIFont.boldSystemFont(ofSize: 20)
         label.text = text
         if #available(iOS 13, *) {
             label.textColor = .label
@@ -81,7 +81,7 @@ final class ShowExpandedVC: UIViewController {
 
     private func label(text: String? = nil, isSecondary: Bool = true) -> UILabel {
         let label = UILabel()
-        label.font = label.font.withSize(15)
+        label.font = label.font.withSize(16)
         label.numberOfLines = 0
         label.text = text
         if #available(iOS 13, *) {
@@ -120,13 +120,8 @@ final class ShowExpandedVC: UIViewController {
         }
     }
 
-
     var showId: Int?
-    var showTitle: String? {
-        didSet {
-            titleLabel.text = showTitle
-        }
-    }
+    var showTitle: String? { didSet { titleLabel.text = showTitle } }
     var imgUrl: String?
 
     let infoView = InfoView()
@@ -138,38 +133,26 @@ final class ShowExpandedVC: UIViewController {
     }
 
     var showDescription: String? {
-        get {
-            return descLabel.text
-        }
-        set {
-            descLabel.text = newValue
+        didSet {
+            descLabel.text = showDescription
         }
     }
 
     var nextEpisodeTitle: String? {
-        get {
-            return nextEpisodeLabel.text
-        }
-        set {
-            nextEpisodeLabel.text = newValue
+        didSet {
+            nextEpisodeLabel.text = nextEpisodeTitle
         }
     }
 
     var nextEpisodeNumber: String? {
-        get {
-            return nextEpisodeNumberLabel.text
-        }
-        set {
-            nextEpisodeNumberLabel.text = newValue
+        didSet {
+            nextEpisodeNumberLabel.text = nextEpisodeNumber
         }
     }
 
     var nextEpisodeDate: String? {
-        get {
-            return nextEpisodeDateLabel.text
-        }
-        set {
-            nextEpisodeDateLabel.text = newValue
+        didSet {
+            nextEpisodeDateLabel.text = nextEpisodeDate
         }
     }
 
