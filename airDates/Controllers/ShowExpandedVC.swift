@@ -40,7 +40,7 @@ final class ShowExpandedVC: UIViewController {
         imgView.layer.shadowColor = UIColor.black.cgColor
         imgView.layer.shadowOpacity = 0.3
         imgView.layer.shadowOffset = .zero
-        imgView.layer.shadowRadius = 16
+        imgView.layer.shadowRadius = 8
         imgView.layer.cornerRadius = 4
         return imgView
     }()

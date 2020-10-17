@@ -9,14 +9,17 @@
 import UIKit
 
 
-final class AddShowVC: UIViewController {
+final class AddShowVC: UITableViewController {
+
+    private var totalPageCount = 0
+    private var currentPageCount = 0
+    private var searchText = ""
 
     weak var delegate: ShowCellDelegate?
 
-    var timer: Timer?
+    private var timer: Timer?
     var shows: [Show] = []
     var images: [UIImage?] = []
-    let tableView = UITableView()
 
     var myShows: [MOShow]?
 
@@ -27,6 +30,7 @@ final class AddShowVC: UIViewController {
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
         searchController.searchBar.delegate = self
+        searchController.obscuresBackgroundDuringPresentation = false
     }
 
     override func loadView() {
@@ -47,21 +51,17 @@ final class AddShowVC: UIViewController {
             tableView.backgroundColor = .white
         }
         setupSearchBar()
-        tableView.frame = view.safeAreaLayoutGuide.layoutFrame
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.tableFooterView = UIView()
 
-        view.addSubview(tableView)
+        tableView.tableFooterView = UIView()
 
         myShows = CoreDataManager.shared.getFetchedResultsController().fetchedObjects
 
         tableView.register(ShowCell.self, forCellReuseIdentifier: ShowCell.reuseId)
     }
-}
 
-extension AddShowVC: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    // MARK: - TableView
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
         let showExpandedVC = ShowExpandedVC()
         let show = shows[indexPath.row]
@@ -78,19 +78,16 @@ extension AddShowVC: UITableViewDelegate {
 
         showExpandedVC.setupUI(network: show.network, country: show.country, status: show.status)
     }
-}
 
-extension AddShowVC: UITableViewDataSource {
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.shows.count
     }
 
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 140
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let show = shows[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: ShowCell.reuseId, for: indexPath) as! ShowCell
@@ -112,16 +109,23 @@ extension AddShowVC: UITableViewDataSource {
         cell.title = show.name
         cell.imgUrl = show.image_thumbnail_path
 
-        NetworkManager.shared.downloadImage(link: show.image_thumbnail_path) { image in
-            cell.img = image
+        if images.count >= indexPath.row && images[indexPath.row] != nil {
+            cell.img = images[indexPath.row]
+        } else {
+            NetworkManager.shared.downloadImage(link: show.image_thumbnail_path) { image in
+                cell.img = image
 
-            if self.images.count > indexPath.row {
-                self.images[indexPath.row] = image
+                if self.images.count > indexPath.row {
+                    self.images[indexPath.row] = image
+                }
             }
         }
 
         cell.title = show.name
         cell.subtitle = show.status
+
+        // Check if loading extra rows is needed.
+        if indexPath.row == shows.count - 1 { loadExtraRowsIfNeeded() }
 
         return cell
     }
@@ -129,49 +133,50 @@ extension AddShowVC: UITableViewDataSource {
 
 extension AddShowVC: UISearchBarDelegate {
 
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
+    private func loadExtraRowsIfNeeded() {
+        guard totalPageCount > currentPageCount, searchText != "", searchText.count > 1 else { return }
 
-            if searchText != "" {
-                NetworkManager.shared.getSearchQueryResults(query: searchText, page: 1) {results in
-                    guard let results = results else { return }
-                    self.images = []
-                    self.shows = results.tv_shows
-                    for _ in self.shows {
-                        self.images.append(nil)
-                    }
-                    if results.pages > 1 {
+        NetworkManager.shared.getSearchQueryResults(query: searchText, page: currentPageCount) { [weak self] results in
 
-                        let dispatchGroup = DispatchGroup()
-                        for i in 2...results.pages {
+            guard let results = results else { return }
 
-                            dispatchGroup.enter()
-                            NetworkManager.shared.getSearchQueryResults(query: searchText, page: i) { moreResults in
-                                guard let moreResults = moreResults else {return}
-                                self.shows.append(contentsOf: moreResults.tv_shows)
-                                for _ in moreResults.tv_shows {
-                                    self.images.append(nil)
-                                }
+            self?.shows += results.tv_shows
+            self?.totalPageCount = results.pages
+            self?.currentPageCount += 1
+            self?.shows.forEach { _ in self?.images.append(nil) }
 
-                                dispatchGroup.leave()
-                            }
-                        }
-
-                        dispatchGroup.notify(queue: DispatchQueue.main) {
-                            DispatchQueue.main.async {
-                                self.tableView.reloadData()
-                            }
-                        }
-                    }
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                    }
+            DispatchQueue.main.async { [weak self] in
+                UIView.animate(withDuration: 0.3) {
+                    self?.tableView.reloadData()
                 }
-            } else {
-                self.shows = []
-                self.images = []
-                self.tableView.reloadData()
+            }
+        }
+    }
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        self.searchText = searchText
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+
+            guard searchText != "", searchText.count > 1 else {
+                self?.shows = []
+                self?.images = []
+                self?.tableView.reloadData()
+                return
+            }
+
+            NetworkManager.shared.getSearchQueryResults(query: searchText, page: 1) { [weak self] results in
+                guard let results = results else { return }
+
+                self?.images = []
+                self?.shows = results.tv_shows
+                self?.totalPageCount = results.pages
+                self?.currentPageCount = 1
+                self?.shows.forEach { _ in self?.images.append(nil) }
+
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
             }
         }
     }

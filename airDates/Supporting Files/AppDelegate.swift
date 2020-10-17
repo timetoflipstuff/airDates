@@ -15,13 +15,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
-        let rootViewController = RootViewController()
-
-        self.window?.rootViewController = rootViewController
-
-        rootViewController.mainViewController.setupTableView {
-            DispatchQueue.main.async {
-                rootViewController.switchToMainScreen()
+        let rootViewController = MyShowsVC()
+        rootViewController.setupTableView {
+            DispatchQueue.main.async { [weak self] in
+                self?.window?.rootViewController = SwipeNavigationController(rootViewController: rootViewController)
             }
         }
 
