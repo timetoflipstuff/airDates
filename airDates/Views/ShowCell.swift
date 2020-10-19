@@ -109,41 +109,36 @@ final class ShowCell: UITableViewCell{
 
         if isActive {
 
-            guard let id = showId, let title = titleLabel.text, let imgUrl = imgUrl else {return}
-            isTrackingShow = !isTrackingShow
+            guard let id = showId else { return }
+            isTrackingShow.toggle()
             isActive = false
 
             if isTrackingShow {
 
-                CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl, status: statusLabel.text ?? nil) { success in
+                CoreDataManager.shared.saveShow(id: Int32(id)) { [weak self] success in
 
-                    if success {
-                        DispatchQueue.main.async {
-                            self.delegate?.didAddShow()
+                    DispatchQueue.main.async { [weak self] in
+                        if success {
+                            self?.delegate?.didAddShow()
+                        } else {
+                            self?.isTrackingShow = false
                         }
-                        self.isActive = true
-                    } else {
-                        self.isTrackingShow = false
-                        self.isActive = true
+                        self?.isActive = true
                     }
                 }
 
             } else {
 
-                CoreDataManager.shared.deleteShow(id: Int32(id)) { success in
+                CoreDataManager.shared.deleteShow(id: Int32(id)) { [weak self] success in
 
-                    if success {
-                        DispatchQueue.main.async {
-                            self.delegate?.didAddShow()
+                    DispatchQueue.main.async { [weak self] in
+                        if success {
+                            self?.delegate?.didAddShow()
+                        } else {
+                            self?.isTrackingShow = true
                         }
-                    } else {
-                       DispatchQueue.main.async {
-                           self.isTrackingShow = true
-                       }
-                   }
-                   DispatchQueue.main.async {
-                       self.isActive = true
-                   }
+                        self?.isActive = true
+                    }
                 }
             }
         }

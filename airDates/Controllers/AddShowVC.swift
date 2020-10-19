@@ -18,8 +18,7 @@ final class AddShowVC: UITableViewController {
     weak var delegate: ShowCellDelegate?
 
     private var timer: Timer?
-    var shows: [Show] = []
-    var images: [UIImage?] = []
+    var shows: [BasicShowMetaInfo] = []
 
     var myShows: [MOShow]?
 
@@ -64,15 +63,13 @@ final class AddShowVC: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
         let showExpandedVC = ShowExpandedVC()
-        let show = shows[indexPath.row]
+        let showModel = shows[indexPath.row]
+        let show = showModel.showInfo
         showExpandedVC.delegate = self
         showExpandedVC.showTitle = show.name
         showExpandedVC.showId = show.id
         showExpandedVC.imgUrl = show.image_thumbnail_path
-
-        if self.images.count > indexPath.row {
-            showExpandedVC.image = self.images[indexPath.row]
-        }
+        showExpandedVC.image = showModel.image
 
         navigationController?.pushViewController(showExpandedVC, animated: true)
 
@@ -89,7 +86,8 @@ final class AddShowVC: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        let show = shows[indexPath.row]
+        let showModel = shows[indexPath.row]
+        let show = showModel.showInfo
         let cell = tableView.dequeueReusableCell(withIdentifier: ShowCell.reuseId, for: indexPath) as! ShowCell
 
         cell.delegate = self
@@ -109,14 +107,13 @@ final class AddShowVC: UITableViewController {
         cell.title = show.name
         cell.imgUrl = show.image_thumbnail_path
 
-        if images.count >= indexPath.row && images[indexPath.row] != nil {
-            cell.img = images[indexPath.row]
+        if let image = showModel.image {
+            cell.img = image
         } else {
-            NetworkManager.shared.downloadImage(link: show.image_thumbnail_path) { image in
-                cell.img = image
-
-                if self.images.count > indexPath.row {
-                    self.images[indexPath.row] = image
+            NetworkManager.downloadImage(link: show.image_thumbnail_path) { [weak cell, weak self] image in
+                DispatchQueue.main.async {
+                    cell?.img = image
+                    self?.shows[indexPath.row].image = image
                 }
             }
         }
@@ -136,14 +133,13 @@ extension AddShowVC: UISearchBarDelegate {
     private func loadExtraRowsIfNeeded() {
         guard totalPageCount > currentPageCount, searchText != "", searchText.count > 1 else { return }
 
-        NetworkManager.shared.getSearchQueryResults(query: searchText, page: currentPageCount) { [weak self] results in
+        NetworkManager.getSearchQueryResults(query: searchText, page: currentPageCount) { [weak self] results in
 
             guard let results = results else { return }
 
-            self?.shows += results.tv_shows
+            self?.shows += results.tv_shows.map { BasicShowMetaInfo(showInfo: $0) }
             self?.totalPageCount = results.pages
             self?.currentPageCount += 1
-            self?.shows.forEach { _ in self?.images.append(nil) }
 
             DispatchQueue.main.async { [weak self] in
                 UIView.animate(withDuration: 0.3) {
@@ -160,19 +156,16 @@ extension AddShowVC: UISearchBarDelegate {
 
             guard searchText != "", searchText.count > 1 else {
                 self?.shows = []
-                self?.images = []
                 self?.tableView.reloadData()
                 return
             }
 
-            NetworkManager.shared.getSearchQueryResults(query: searchText, page: 1) { [weak self] results in
+            NetworkManager.getSearchQueryResults(query: searchText, page: 1) { [weak self] results in
                 guard let results = results else { return }
 
-                self?.images = []
-                self?.shows = results.tv_shows
+                self?.shows = results.tv_shows.map { BasicShowMetaInfo(showInfo: $0) }
                 self?.totalPageCount = results.pages
                 self?.currentPageCount = 1
-                self?.shows.forEach { _ in self?.images.append(nil) }
 
                 DispatchQueue.main.async {
                     self?.tableView.reloadData()

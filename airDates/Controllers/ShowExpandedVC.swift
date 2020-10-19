@@ -254,7 +254,11 @@ final class ShowExpandedVC: UIViewController {
 
             dispatchGroup.enter()
 
-            NetworkManager.shared.downloadImage(link: imgUrl) { image in
+            NetworkManager.downloadImage(link: imgUrl) { image in
+                guard let image = image else {
+                    dispatchGroup.leave()
+                    return
+                }
                 self.imgView.image = image
                 var aspectRatio = image.size.width/image.size.height
                 if aspectRatio > 1.5 {
@@ -274,7 +278,7 @@ final class ShowExpandedVC: UIViewController {
 
         dispatchGroup.enter()
 
-        NetworkManager.shared.getShowData(id: Int32(showId)) { showData in
+        NetworkManager.getShowData(id: Int32(showId)) { showData in
             guard let showData = showData else {
 
                 completion(false)
@@ -283,7 +287,7 @@ final class ShowExpandedVC: UIViewController {
             }
             var genreString = ""
 
-            for genre in showData.tvShow.genres {
+            for genre in showData.genres {
                 if genreString == "" {
                     genreString += genre
                 } else {
@@ -292,10 +296,10 @@ final class ShowExpandedVC: UIViewController {
             }
             DispatchQueue.main.async {
                 self.infoView.genreText = genreString
-                let descString = showData.tvShow.description.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
+                let descString = showData.description.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
                 self.descLabel.text = descString
 
-                if let nextEpisode = showData.tvShow.countdown {
+                if let nextEpisode = showData.countdown {
                     self.nextEpisodeNumberLabel.text = "Season \(nextEpisode.season), Episode \(nextEpisode.episode)"
                     self.nextEpisodeLabel.text = nextEpisode.name
 
@@ -328,13 +332,13 @@ final class ShowExpandedVC: UIViewController {
         
         if isActive {
 
-            guard let id = showId, let title = titleLabel.text, let imgUrl = imgUrl else {return}
+            guard let id = showId else {return}
             isTrackingShow = !isTrackingShow
             isActive = false
 
             if isTrackingShow {
 
-                CoreDataManager.shared.saveShow(id: Int32(id), title: title, imgUrl: imgUrl, status: infoView.statusText ?? nil) {success in
+                CoreDataManager.shared.saveShow(id: Int32(id)) {success in
 
                     if success {
                         DispatchQueue.main.async {

@@ -44,7 +44,7 @@ final class ModelHelper {
         return "New episode in \(countdown)"
     }
 
-    static func getMinutesTilNextEpisode(from dateString: String) -> NSNumber? {
+    private static func getMinutesTilNextEpisode(from dateString: String) -> NSNumber? {
         var minutesTilNextEpisode: Int?
         guard let difference = getTimeTilNextEpisode(from: dateString),
             let years = difference.year,

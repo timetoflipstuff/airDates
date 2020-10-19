@@ -9,17 +9,11 @@
 import UIKit
 import CoreData
 
-fileprivate struct ShowCellModel {
-    var show: MOShow
-    var minutesTilNextEpisode: Int? = nil
-    var thumbnailImage: UIImage? = nil
-}
-
 /// The "My Shows" screen.
 final class MyShowsVC: UITableViewController {
     
     private let coreData = CoreDataManager.shared
-    private var myShows: [ShowCellModel] = []
+    private var myShows: [ShowMetaInfo] = []
 
     override func loadView() {
         super.loadView()
@@ -66,26 +60,22 @@ final class MyShowsVC: UITableViewController {
         myShows = []
         tableView.reloadData()
 
-        coreData.updateSavedShowData() {
-
-            guard let fetchedShows = self.coreData.getFetchedResultsController().fetchedObjects else {
-                self.myShows = []
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                    completion()
-                }
-
-                completion()
-                return
-            }
-
-            self.myShows = fetchedShows.map { ShowCellModel(show: $0) }
-
+        guard let fetchedShows = coreData.getFetchedResultsController().fetchedObjects else {
+            // TO DO: Add a "Something went wrong" screen.
+            myShows = []
             DispatchQueue.main.async {
                 self.tableView.reloadData()
+                completion()
             }
+            return
+        }
 
-            completion()
+        NetworkManager.getShowsData(ids: fetchedShows.map { $0.id }) { [weak self] in
+            self?.myShows = $0
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+                completion()
+            }
         }
     }
 
@@ -99,18 +89,24 @@ final class MyShowsVC: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        let show = myShows[indexPath.row].show
+        let show = myShows[indexPath.row].showInfo
         let cell = tableView.dequeueReusableCell(withIdentifier: ShowCell.reuseId, for: indexPath) as! ShowCell
 
-        cell.title = show.title
-        cell.subtitle = ModelHelper.getNextEpisodeString(from: show.nextEpisodeDateSnapshot) ??
-            show.status == "Running" ? "Unannounced" : show.status
+        cell.title = show.name
+
+        if let nextEpisodeDate = try? ModelHelper.getEpisodeDate(from: show.countdown?.air_date),
+            let nextEpisodeString = ModelHelper.getNextEpisodeString(from: nextEpisodeDate) {
+            cell.subtitle = nextEpisodeString
+        } else {
+            cell.subtitle = show.status == "Running" ? "Unannounced" : show.status
+        }
+
         cell.isAddShowButtonHidden = true
 
-        NetworkManager.shared.downloadImage(link: show.imgUrl) { image in
+        NetworkManager.downloadImage(link: show.thumbnailPath) { image in
             DispatchQueue.main.async { [weak self, weak cell] in
                 cell?.img = image
-                self?.myShows[indexPath.row].thumbnailImage = image
+                self?.myShows[indexPath.row].image = image
             }
         }
 
@@ -121,13 +117,13 @@ final class MyShowsVC: UITableViewController {
 
         let showExpandedVC = ShowExpandedVC()
         let showModel = myShows[indexPath.row]
-        let show = showModel.show
+        let show = showModel.showInfo
 
         showExpandedVC.delegate = self
-        showExpandedVC.image = showModel.thumbnailImage
-        showExpandedVC.showTitle = show.title
+        showExpandedVC.image = myShows[indexPath.row].image
+        showExpandedVC.showTitle = show.name
         showExpandedVC.showId = Int(show.id)
-        showExpandedVC.imgUrl = show.imgUrl
+        showExpandedVC.imgUrl = show.thumbnailPath
 
         navigationController?.pushViewController(showExpandedVC, animated: true)
 
