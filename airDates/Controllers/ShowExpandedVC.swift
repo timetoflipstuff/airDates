@@ -24,7 +24,7 @@ final class ShowExpandedVC: UIViewController {
         return view
     }()
 
-    private lazy var colorView = UIView()
+    private lazy var colorView = BlurImageView()
 
     private lazy var titleLabel: UILabel = {
         var titleLabel = UILabel()
@@ -42,6 +42,7 @@ final class ShowExpandedVC: UIViewController {
         imgView.layer.shadowOffset = .zero
         imgView.layer.shadowRadius = 8
         imgView.layer.cornerRadius = 4
+        imgView.clipsToBounds = true
         return imgView
     }()
 
@@ -69,7 +70,7 @@ final class ShowExpandedVC: UIViewController {
 
     private func titleLabel(text: String?) -> UILabel {
         let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.font = .boldSystemFont(ofSize: 20)
         label.text = text
         if #available(iOS 13, *) {
             label.textColor = .label
@@ -97,8 +98,6 @@ final class ShowExpandedVC: UIViewController {
     private func setColor(_ color: UIColor?) {
         let color = color ?? .darkGray
         overlayView.backgroundColor = color
-        colorView.backgroundColor = color
-        view.backgroundColor = color
     }
 
     // MARK: - Public Interface
@@ -129,6 +128,7 @@ final class ShowExpandedVC: UIViewController {
     var image: UIImage? {
         didSet {
             imgView.image = image
+            colorView.image = image
         }
     }
 
@@ -171,6 +171,12 @@ final class ShowExpandedVC: UIViewController {
 
         navigationController?.navigationBar.tintColor = .lightPink
 
+        if #available(iOS 13, *) {
+            view.backgroundColor = .systemBackground
+        } else {
+            view.backgroundColor = .white
+        }
+
         addShowButton.addTarget(self, action: #selector(addShowButtonTapped), for: .touchUpInside)
 
         [overlayView, scrollView, subScrollView, colorView, titleLabel, imgView, infoView, addShowButton, nextEpisodeTitleLabel, nextEpisodeNumberLabel, nextEpisodeLabel, nextEpisodeDateLabel, descTitleLabel, descLabel].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
@@ -178,9 +184,7 @@ final class ShowExpandedVC: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(subScrollView)
 
-        [colorView, titleLabel].forEach { subScrollView.addSubview($0) }
-
-        [imgView, infoView, addShowButton].forEach { colorView.addSubview($0) }
+        [colorView, titleLabel, imgView, infoView, addShowButton].forEach { subScrollView.addSubview($0) }
 
         [nextEpisodeTitleLabel, nextEpisodeLabel, nextEpisodeNumberLabel, nextEpisodeDateLabel, descTitleLabel, descLabel].forEach {
             subScrollView.addSubview($0)
@@ -217,18 +221,18 @@ final class ShowExpandedVC: UIViewController {
 
         infoView.statusText = status ?? "Unknown"
 
-        setupUI() { success in
+        setupUI() { [weak self] success in
             if success {
-                self.hideOverlayView()
+                self?.hideOverlayView()
             } else {
-                self.navigationController?.popViewController(animated: true)
+                self?.dismiss(animated: true)
             }
         }
     }
     
     private func setupUI(completion: @escaping(Bool) -> Void) {
 
-        guard let imgUrl = imgUrl, let showId = showId, let myShows = fetchedResultsController.fetchedObjects else {return}
+        guard let imgUrl = imgUrl, let showId = showId, let myShows = fetchedResultsController.fetchedObjects else { return }
 
         for myShow in myShows {
             if myShow.id == Int32(showId) {
@@ -294,7 +298,10 @@ final class ShowExpandedVC: UIViewController {
                     genreString += ", \(genre)"
                 }
             }
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+
+                guard let self = self else { return }
+
                 self.infoView.genreText = genreString
                 let descString = showData.description.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
                 self.descLabel.text = descString
@@ -310,7 +317,7 @@ final class ShowExpandedVC: UIViewController {
 
                     if let date = dateFormatter.date(from: nextEpisode.air_date) {
 
-                        dateFormatter.timeZone = TimeZone.current
+                        dateFormatter.timeZone = .current
                         dateFormatter.dateStyle = .medium
                         dateFormatter.timeStyle = .short
                         self.nextEpisodeDateLabel.text = "Airs on \(dateFormatter.string(from: date))"
@@ -365,12 +372,17 @@ final class ShowExpandedVC: UIViewController {
                 }
             }
         }
-        
+    }
+
+    @objc private func closeButtonTapped() {
+        dismiss(animated: true)
     }
 
     // MARK: - Constraints
     
     private func setupConstraints() {
+
+        colorView.setContentCompressionResistancePriority(.init(1), for: .vertical)
 
         NSLayoutConstraint.activate([
             overlayView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
@@ -382,7 +394,7 @@ final class ShowExpandedVC: UIViewController {
             scrollView.leftAnchor.constraint(equalTo: view.leftAnchor),
             scrollView.rightAnchor.constraint(equalTo: view.rightAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            
+
             subScrollView.topAnchor.constraint(equalTo: scrollView.topAnchor),
             subScrollView.bottomAnchor.constraint(equalTo: descLabel.bottomAnchor, constant: 16),
             subScrollView.leftAnchor.constraint(equalTo: view.leftAnchor),
@@ -393,7 +405,7 @@ final class ShowExpandedVC: UIViewController {
             colorView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             colorView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
-            titleLabel.topAnchor.constraint(equalTo: subScrollView.topAnchor, constant: 32),
+            titleLabel.topAnchor.constraint(equalTo: subScrollView.topAnchor, constant: 48),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             

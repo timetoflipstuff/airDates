@@ -33,7 +33,7 @@ struct ShowInfoJSON: Codable {
 /// Represents a single show returned by the API.
 struct ShowInfo: Codable {
     var id: Int
-    var thumbnailPath: String
+    var image_thumbnail_path: String
     var name: String
     var description: String
     var genres: [String]

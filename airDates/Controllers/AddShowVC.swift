@@ -71,7 +71,7 @@ final class AddShowVC: UITableViewController {
         showExpandedVC.imgUrl = show.image_thumbnail_path
         showExpandedVC.image = showModel.image
 
-        navigationController?.pushViewController(showExpandedVC, animated: true)
+        present(showExpandedVC, animated: true)
 
         showExpandedVC.setupUI(network: show.network, country: show.country, status: show.status)
     }

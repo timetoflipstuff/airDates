@@ -35,7 +35,7 @@ final class CoreDataManager {
     func deleteShow(id: Int32, completion: @escaping(Bool) -> Void) {
         
         stack.persistentContainer.performBackgroundTask { (context) in
-            let fetchRequest = NSFetchRequest<MOShow>(entityName: "Show2")
+            let fetchRequest = NSFetchRequest<MOShow>(entityName: "Show")
             fetchRequest.predicate = NSPredicate(format: "id = %d", id)
             do {
                 let fetchedShows = try context.fetch(fetchRequest)

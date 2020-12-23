@@ -71,7 +71,15 @@ final class MyShowsVC: UITableViewController {
         }
 
         NetworkManager.getShowsData(ids: fetchedShows.map { $0.id }) { [weak self] in
-            self?.myShows = $0
+            self?.myShows = $0.sorted {
+                arg1, arg2 in
+                let date1 = arg1.showInfo.countdown?.air_date
+                let date2 = arg2.showInfo.countdown?.air_date
+                guard let time1 = ModelHelper.getMinutesTilNextEpisode(from: date1 ?? "") else { return false }
+                guard let time2 = ModelHelper.getMinutesTilNextEpisode(from: date2 ?? "") else { return true }
+
+                return time1.intValue < time2.intValue
+            }
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
                 completion()
@@ -103,7 +111,7 @@ final class MyShowsVC: UITableViewController {
 
         cell.isAddShowButtonHidden = true
 
-        NetworkManager.downloadImage(link: show.thumbnailPath) { image in
+        NetworkManager.downloadImage(link: show.image_thumbnail_path) { image in
             DispatchQueue.main.async { [weak self, weak cell] in
                 cell?.img = image
                 self?.myShows[indexPath.row].image = image
@@ -123,9 +131,9 @@ final class MyShowsVC: UITableViewController {
         showExpandedVC.image = myShows[indexPath.row].image
         showExpandedVC.showTitle = show.name
         showExpandedVC.showId = Int(show.id)
-        showExpandedVC.imgUrl = show.thumbnailPath
+        showExpandedVC.imgUrl = show.image_thumbnail_path
 
-        navigationController?.pushViewController(showExpandedVC, animated: true)
+        present(showExpandedVC, animated: true)
 
         showExpandedVC.setupUI(network: show.network, country: show.country, status: show.status)
     }
